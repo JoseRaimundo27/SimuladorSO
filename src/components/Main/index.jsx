@@ -1,6 +1,9 @@
-// Main.js
 import React, { useState } from "react";
 import ProcessCard from "./ProcessCard";
+import FIFOSimulation from "../../algorithms/FIFOSimulation"
+import SJFSsimulation from "../../algorithms/SJFSimulation";
+import RoundRobinSimulation from "../../algorithms/RoundRobinSimulation";
+import EDFSimulation from "../../algorithms/EDFSimulation";
 import "./style.css";
 
 function Main() {
@@ -10,13 +13,11 @@ function Main() {
   const [overhead, setOverhead] = useState(0);
   const [pagination, setPagination] = useState("fifo");
   const [processData, setProcessData] = useState([]);
+  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
 
-  // Atualiza o número de processos e inicializa os dados padrão
   const handleNumProcessesChange = (n) => {
-    const newNum = Math.max(1, Number(n)); // Garantir pelo menos 1 processo
+    const newNum = Math.max(1, Number(n));
     setNumProcesses(newNum);
-
-    // Cria um array de objetos padrão para os processos
     const newProcesses = Array.from({ length: newNum }, (_, index) => ({
       id: index + 1,
       tempo: 0,
@@ -24,31 +25,16 @@ function Main() {
       deadline: 0,
       chegada: 0,
     }));
-
     setProcessData(newProcesses);
   };
 
-  // Atualiza os valores de um processo específico
   const handleProcessDataChange = (index, field, value) => {
     const updatedProcesses = [...processData];
     updatedProcesses[index][field] = Number(value);
     setProcessData(updatedProcesses);
   };
 
-  const handleSimulationStart = () => {
-    console.log("Iniciar Simulação com:", {
-      numProcesses,
-      algorithm,
-      quantum,
-      overhead,
-      pagination,
-      processData,
-    });
-    // Adicione aqui a lógica para iniciar a simulação
-  };
-
   const handleSimulationReset = () => {
-    console.log("Simulação resetada");
     setNumProcesses(1);
     setAlgorithm("fifo");
     setQuantum(0);
@@ -70,7 +56,6 @@ function Main() {
               onChange={(e) => handleNumProcessesChange(e.target.value)}
             />
           </label>
-
           <label>
             Método:
             <select
@@ -83,30 +68,26 @@ function Main() {
               <option value="round_robin">Round Robin</option>
             </select>
           </label>
-
           <label>
-            Quantum (SÓ Round Robin?):
+            Quantum:
             <input
               type="number"
               min="0"
-              placeholder="Ex: 2"
               value={quantum}
               onChange={(e) => setQuantum(Number(e.target.value))}
               disabled={algorithm !== "round_robin"}
             />
           </label>
-
           <label>
             Sobrecarga:
             <input
               type="number"
               min="0"
-              placeholder="Ex: 1"
               value={overhead}
               onChange={(e) => setOverhead(Number(e.target.value))}
+              disabled={algorithm ==  "fifo"}
             />
           </label>
-
           <label>
             Paginação:
             <select
@@ -134,14 +115,36 @@ function Main() {
         </div>
 
         <div className="config-form-button-group">
-          <button type="button" onClick={handleSimulationStart}>
+          <button
+            type="button"
+            onClick={() => setIsSimulationRunning(true)}
+            disabled={isSimulationRunning} // Desativa o botão enquanto a simulação está ativa
+          >
             Iniciar Simulação
           </button>
+
           <button type="button" onClick={handleSimulationReset}>
             Resetar Simulação
           </button>
         </div>
       </form>
+
+      {/* Renderiza o componente de simulação baseado no algoritmo selecionado */}
+      {algorithm === "fifo" && (
+        <FIFOSimulation processData={processData} overhead={overhead} isSimulationRunning={isSimulationRunning} />
+      )}
+      {algorithm === "sjf" && (
+        <SJFSsimulation processData={processData} overhead={overhead} isSimulationRunning={isSimulationRunning}/>
+      )}
+      {algorithm === "round_robin" && (
+        <RoundRobinSimulation
+          processData={processData}
+          quantum={quantum}
+          overhead={overhead}
+          isSimulationRunning={isSimulationRunning}
+        />
+      )}
+      {algorithm === "edf" && <EDFSimulation processData={processData} isSimulationRunning={isSimulationRunning} />}
     </section>
   );
 }

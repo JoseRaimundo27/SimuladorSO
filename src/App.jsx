@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import Header from "./components/Header";
 import Main from "./components/Main";
-import Simulation from "./components/Simulation";
+
 
 function App() {
   const [count, setCount] = useState(0);
@@ -16,7 +16,6 @@ function App() {
      
       <main className="main-content">
         <Main/>
-        <Simulation/>
       </main>
 
       <footer className="footer">

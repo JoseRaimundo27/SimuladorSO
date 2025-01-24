@@ -1,0 +1,42 @@
+.simulation-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .process-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .process-row h4 {
+    font-size: 1rem;
+    margin: 0;
+  }
+  
+  .process-timeline {
+    display: flex;
+    gap: 2px;
+  }
+  
+  .timeline-block {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    background-color: lightgray;
+  }
+  
+  .timeline-block.green {
+    background-color: #4caf50; /* Executando */
+  }
+  
+  .timeline-block.yellow {
+    background-color: #ffc107; /* Esperando */
+  }
+  
+  .timeline-block.red {
+    background-color: #f44336; /* Overhead */
+  }
+  
