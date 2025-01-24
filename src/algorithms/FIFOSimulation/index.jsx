@@ -1,41 +1,34 @@
 import React, { useState, useEffect } from "react";
 import "../style.css";
 
-function FIFOSimulation({ processData, overhead, isSimulationRunning }) {
+function FIFOSimulation({ processData, isSimulationRunning }) {
   const [simulationData, setSimulationData] = useState([]);
 
   useEffect(() => {
     if (!isSimulationRunning) return; // Apenas simula se a simulação estiver ativa
 
+    // Calcula o tempo total baseado nos tempos de execução dos processos
     const totalTime = processData.reduce((acc, process) => acc + process.tempo, 0);
-    const timeline = Array(totalTime).fill("wait");
+
+    // Cria a linha do tempo para cada processo
     const simulation = processData.map((process) => ({
       id: process.id,
-      timeline: [...timeline],
+      timeline: Array(totalTime).fill("wait"),
     }));
 
     let currentTime = 0;
-    for (let i = 0; i < processData.length; i++) {
-      const process = simulation[i];
-      const processTime = processData[i].tempo;
 
-      for (let j = 0; j < processTime; j++) {
-        process.timeline[currentTime++] = "execute";
-      }
+    // Executa cada processo em sequência
+    processData.forEach((process, index) => {
+      const processTimeline = simulation[index].timeline;
 
-      // Adiciona overhead, se aplicável
-      for (let k = 0; k < overhead; k++) {
-        if (currentTime < totalTime) {
-          simulation.forEach((p) => {
-            p.timeline[currentTime] = "overhead";
-          });
-          currentTime++;
-        }
+      for (let i = 0; i < process.tempo; i++) {
+        processTimeline[currentTime++] = "execute"; // Marca o tempo como "execute"
       }
-    }
+    });
 
     setSimulationData(simulation);
-  }, [isSimulationRunning, processData, overhead]); // Dependências atualizadas
+  }, [isSimulationRunning, processData]); // Atualiza quando os dados ou o estado mudar
 
   return (
     <div className="simulation-container">
@@ -47,11 +40,7 @@ function FIFOSimulation({ processData, overhead, isSimulationRunning }) {
               <div
                 key={index}
                 className={`timeline-block ${
-                  state === "execute"
-                    ? "green"
-                    : state === "wait"
-                    ? "yellow"
-                    : "red"
+                  state === "execute" ? "green" : "yellow"
                 }`}
               ></div>
             ))}

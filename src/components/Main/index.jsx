@@ -13,7 +13,7 @@ function Main() {
   const [overhead, setOverhead] = useState(0);
   const [pagination, setPagination] = useState("fifo");
   const [processData, setProcessData] = useState([]);
-  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
+  const [isSimulationRunning, setIsSimulationRunning] = useState(false); // Estado para controle de execução
 
   const handleNumProcessesChange = (n) => {
     const newNum = Math.max(1, Number(n));
@@ -41,6 +41,11 @@ function Main() {
     setOverhead(0);
     setPagination("fifo");
     setProcessData([]);
+    setIsSimulationRunning(false); // Simulação não está mais em execução
+  };
+
+  const handleStartSimulation = () => {
+    setIsSimulationRunning(true); // Inicia a simulação
   };
 
   return (
@@ -85,7 +90,6 @@ function Main() {
               min="0"
               value={overhead}
               onChange={(e) => setOverhead(Number(e.target.value))}
-              disabled={algorithm ==  "fifo"}
             />
           </label>
           <label>
@@ -115,36 +119,34 @@ function Main() {
         </div>
 
         <div className="config-form-button-group">
-          <button
-            type="button"
-            onClick={() => setIsSimulationRunning(true)}
-            disabled={isSimulationRunning} // Desativa o botão enquanto a simulação está ativa
-          >
-            Iniciar Simulação
+          <button type="button" onClick={handleStartSimulation}>
+            Rodar Simulação
           </button>
 
           <button type="button" onClick={handleSimulationReset}>
             Resetar Simulação
           </button>
+
         </div>
       </form>
 
-      {/* Renderiza o componente de simulação baseado no algoritmo selecionado */}
-      {algorithm === "fifo" && (
-        <FIFOSimulation processData={processData} overhead={overhead} isSimulationRunning={isSimulationRunning} />
+      {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
+      {isSimulationRunning && algorithm === "fifo" && (
+        <FIFOSimulation processData={processData} isSimulationRunning={isSimulationRunning} />
       )}
-      {algorithm === "sjf" && (
-        <SJFSsimulation processData={processData} overhead={overhead} isSimulationRunning={isSimulationRunning}/>
+      {isSimulationRunning && algorithm === "sjf" && (
+        <SJFSsimulation processData={processData} isSimulationRunning={isSimulationRunning} />
       )}
-      {algorithm === "round_robin" && (
+      {isSimulationRunning && algorithm === "round_robin" && (
         <RoundRobinSimulation
           processData={processData}
           quantum={quantum}
-          overhead={overhead}
           isSimulationRunning={isSimulationRunning}
         />
       )}
-      {algorithm === "edf" && <EDFSimulation processData={processData} isSimulationRunning={isSimulationRunning} />}
+      {isSimulationRunning && algorithm === "edf" && (
+        <EDFSimulation processData={processData} isSimulationRunning={isSimulationRunning} />
+      )}
     </section>
   );
 }
