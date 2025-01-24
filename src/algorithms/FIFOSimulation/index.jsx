@@ -1,34 +1,47 @@
 import React, { useState, useEffect } from "react";
 import "../style.css";
 
-function FIFOSimulation({ processData, isSimulationRunning }) {
+function FIFOSimulation({ processData, overhead }) {
   const [simulationData, setSimulationData] = useState([]);
+  const [turnaroundAvg, setTurnaroundAvg] = useState(0); // Variável para armazenar o TAT médio
 
   useEffect(() => {
-    if (!isSimulationRunning) return; // Apenas simula se a simulação estiver ativa
-
-    // Calcula o tempo total baseado nos tempos de execução dos processos
     const totalTime = processData.reduce((acc, process) => acc + process.tempo, 0);
-
-    // Cria a linha do tempo para cada processo
+    const timeline = Array(totalTime).fill("wait");
     const simulation = processData.map((process) => ({
       id: process.id,
-      timeline: Array(totalTime).fill("wait"),
+      timeline: [...timeline],
     }));
 
     let currentTime = 0;
+    // A execução dos processos no FIFO
+    for (let i = 0; i < processData.length; i++) {
+      const process = simulation[i];
+      const processTime = processData[i].tempo;
 
-    // Executa cada processo em sequência
-    processData.forEach((process, index) => {
-      const processTimeline = simulation[index].timeline;
-
-      for (let i = 0; i < process.tempo; i++) {
-        processTimeline[currentTime++] = "execute"; // Marca o tempo como "execute"
+      for (let j = 0; j < processTime; j++) {
+        process.timeline[currentTime++] = "execute";
       }
-    });
+    }
 
     setSimulationData(simulation);
-  }, [isSimulationRunning, processData]); // Atualiza quando os dados ou o estado mudar
+
+    // Calcular o Turnaround Time e o Turnaround Time médio
+    let totalTurnaroundTime = 0;
+    processData.forEach((process, index) => {
+      // Tempo de Conclusão = tempo atual após o processamento do processo
+      const completionTime = processData
+        .slice(0, index + 1) // Todos os processos até o atual
+        .reduce((acc, p) => acc + p.tempo, 0); // Tempo acumulado de execução
+
+      const turnaroundTime = completionTime - process.chegada; // TAT = Conclusão - Chegada
+      totalTurnaroundTime += turnaroundTime;
+    });
+
+    // Calcular TAT médio
+    const averageTurnaroundTime = totalTurnaroundTime / processData.length;
+    setTurnaroundAvg(averageTurnaroundTime); // Armazenar o valor do TAT médio
+  }, [processData, overhead]);
 
   return (
     <div className="simulation-container">
@@ -40,13 +53,20 @@ function FIFOSimulation({ processData, isSimulationRunning }) {
               <div
                 key={index}
                 className={`timeline-block ${
-                  state === "execute" ? "green" : "yellow"
+                  state === "execute"
+                    ? "green"
+                    : state === "wait"
+                    ? "yellow"
+                    : "red"
                 }`}
               ></div>
             ))}
           </div>
         </div>
       ))}
+      <div className="turnaround-info">
+        <h4>Turnaround Time Médio: {turnaroundAvg.toFixed(2)}</h4> {/* Exibe o TAT médio */}
+      </div>
     </div>
   );
 }

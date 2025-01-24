@@ -29,6 +29,10 @@ function Main() {
   };
 
   const handleProcessDataChange = (index, field, value) => {
+    if (index === 0 && field === "chegada") {
+      value = 0; // Garante que o tempo de chegada do Processo 1 seja sempre 0
+      alert("Não podemos alterar a chegada do primeiro processo")
+    }
     const updatedProcesses = [...processData];
     updatedProcesses[index][field] = Number(value);
     setProcessData(updatedProcesses);
