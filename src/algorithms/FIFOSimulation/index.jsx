@@ -3,22 +3,35 @@ import "../style.css";
 
 function FIFOSimulation({ processData }) {
   const [simulationData, setSimulationData] = useState([]);
-  const [turnaroundAvg, setTurnaroundAvg] = useState(0); // Variável para armazenar o TAT médio
+  const [orderedProcesses, setOrderedProcesses] = useState([]);
+  const [turnaroundAvg, setTurnaroundAvg] = useState(0);
 
   useEffect(() => {
-    const totalTime = processData.reduce((acc, process) => acc + process.tempo, 0);
+    // Ordenar os processos pela chegada
+    const sortedProcesses = [...processData].sort((a, b) => a.chegada - b.chegada);
+    setOrderedProcesses(sortedProcesses);
+
+    // Criar a linha do tempo para cada processo
+    const totalTime = sortedProcesses.reduce((acc, process) => acc + process.tempo, 0);
     const timeline = Array(totalTime).fill("wait");
-    const simulation = processData.map((process) => ({
+    const simulation = sortedProcesses.map((process) => ({
       id: process.id,
       timeline: [...timeline],
     }));
 
     let currentTime = 0;
-    // A execução dos processos no FIFO
-    for (let i = 0; i < processData.length; i++) {
-      const process = simulation[i];
-      const processTime = processData[i].tempo;
 
+    // Executar os processos na ordem
+    for (let i = 0; i < sortedProcesses.length; i++) {
+      const process = simulation[i];
+      const processTime = sortedProcesses[i].tempo;
+
+      // Avança o tempo até que o processo atual possa começar
+      if (currentTime < sortedProcesses[i].chegada) {
+        currentTime = sortedProcesses[i].chegada;
+      }
+
+      // Executa o processo
       for (let j = 0; j < processTime; j++) {
         process.timeline[currentTime++] = "execute";
       }
@@ -26,23 +39,31 @@ function FIFOSimulation({ processData }) {
 
     setSimulationData(simulation);
 
-    // Calcular o Turnaround Time e o Turnaround Time médio
+    // Calcular o Turnaround Time médio
     let totalTurnaroundTime = 0;
-    processData.forEach((process, index) => {
-      const completionTime = processData
-        .slice(0, index + 1)
-        .reduce((acc, p) => acc + p.tempo, 0);
-
+    sortedProcesses.forEach((process, index) => {
+      const completionTime = simulation[index].timeline.lastIndexOf("execute") + 1;
       const turnaroundTime = completionTime - process.chegada;
       totalTurnaroundTime += turnaroundTime;
     });
 
-    const averageTurnaroundTime = totalTurnaroundTime / processData.length;
+    const averageTurnaroundTime = totalTurnaroundTime / sortedProcesses.length;
     setTurnaroundAvg(averageTurnaroundTime);
   }, [processData]);
 
   return (
     <div className="simulation-container">
+      {/* <h3>Lista de Processos Ordenada</h3>
+      <div className="process-list">
+        {orderedProcesses.map((process) => (
+          <div key={process.id} className="process-item">
+            <p>Processo {process.id}</p>
+            <p>Chegada: {process.chegada}</p>
+            <p>Tempo: {process.tempo}</p>
+          </div>
+        ))}
+      </div>
+      <h3>Simulação</h3> */}
       {simulationData.map((process) => (
         <div key={process.id} className="process-row">
           <h4>Processo {process.id}</h4>
@@ -57,7 +78,7 @@ function FIFOSimulation({ processData }) {
                     ? "yellow"
                     : "red"
                 }`}
-                style={{ animationDelay: `${index * 0.7}s` }} // Adiciona delay gradual
+                style={{ animationDelay: `${index * 0.7}s` }}
               ></div>
             ))}
           </div>
