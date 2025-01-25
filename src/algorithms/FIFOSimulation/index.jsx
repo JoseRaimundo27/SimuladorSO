@@ -3,87 +3,83 @@ import "../style.css";
 
 function FIFOSimulation({ processData }) {
   const [simulationData, setSimulationData] = useState([]);
-  const [orderedProcesses, setOrderedProcesses] = useState([]);
   const [turnaroundAvg, setTurnaroundAvg] = useState(0);
 
   useEffect(() => {
-    // Ordenar os processos pela chegada
-    const sortedProcesses = [...processData].sort((a, b) => a.chegada - b.chegada);
-    setOrderedProcesses(sortedProcesses);
+    // 1) Ordenar os processos pela hora de chegada
+    const sorted = [...processData].sort((a, b) => a.chegada - b.chegada);
 
-    // Criar a linha do tempo para cada processo
-    const totalTime = sortedProcesses.reduce((acc, process) => acc + process.tempo, 0);
-    const timeline = Array(totalTime).fill("wait");
-    const simulation = sortedProcesses.map((process) => ({
-      id: process.id,
-      timeline: [...timeline],
-    }));
+    // 2) Calcular start e finish de cada processo em ordem FIFO
+    let currentFinish = 0;
+    sorted.forEach((p) => {
+      const start = Math.max(p.chegada, currentFinish);
+      const finish = start + p.tempo;
+      p.start = start;
+      p.finish = finish;
+      currentFinish = finish;
+    });
 
-    let currentTime = 0;
+    // 3) Montar o timeline de cada processo
+    const simulation = sorted.map((p) => {
+      // Se você quer mostrar até o tempo finish do processo
+      const timeline = Array(p.finish).fill("wait");
 
-    // Executar os processos na ordem
-    for (let i = 0; i < sortedProcesses.length; i++) {
-      const process = simulation[i];
-      const processTime = sortedProcesses[i].tempo;
-
-      // Avança o tempo até que o processo atual possa começar
-      if (currentTime < sortedProcesses[i].chegada) {
-        currentTime = sortedProcesses[i].chegada;
+      // Preencher de 'start' até 'finish - 1' como "execute"
+      for (let t = p.start; t < p.finish; t++) {
+        timeline[t] = "execute";
       }
 
-      // Executa o processo
-      for (let j = 0; j < processTime; j++) {
-        process.timeline[currentTime++] = "execute";
-      }
-    }
+      return {
+        id: p.id,
+        timeline,
+        arrival: p.chegada,
+        start: p.start,
+        finish: p.finish,
+      };
+    });
 
     setSimulationData(simulation);
 
-    // Calcular o Turnaround Time médio
-    let totalTurnaroundTime = 0;
-    sortedProcesses.forEach((process, index) => {
-      const completionTime = simulation[index].timeline.lastIndexOf("execute") + 1;
-      const turnaroundTime = completionTime - process.chegada;
-      totalTurnaroundTime += turnaroundTime;
-    });
+    // 4) Calcular Turnaround Médio
+    const totalTurnaround = sorted.reduce((acc, p) => {
+      const tat = p.finish - p.chegada;
+      return acc + tat;
+    }, 0);
 
-    const averageTurnaroundTime = totalTurnaroundTime / sortedProcesses.length;
-    setTurnaroundAvg(averageTurnaroundTime);
+    const averageTurnaround = totalTurnaround / sorted.length;
+    setTurnaroundAvg(averageTurnaround);
+
   }, [processData]);
 
   return (
     <div className="simulation-container">
-      {/* <h3>Lista de Processos Ordenada</h3>
-      <div className="process-list">
-        {orderedProcesses.map((process) => (
-          <div key={process.id} className="process-item">
-            <p>Processo {process.id}</p>
-            <p>Chegada: {process.chegada}</p>
-            <p>Tempo: {process.tempo}</p>
-          </div>
-        ))}
-      </div>
-      <h3>Simulação</h3> */}
-      {simulationData.map((process) => (
-        <div key={process.id} className="process-row">
-          <h4>Processo {process.id}</h4>
+      <h3>Simulação FIFO</h3>
+
+      {simulationData.map((p) => (
+        <div key={p.id} className="process-row">
+          <h4>
+            Processo {p.id} (chegou {p.arrival}, 
+            iniciou {p.start}, terminou {p.finish})
+          </h4>
           <div className="process-timeline">
-            {process.timeline.map((state, index) => (
+            {p.timeline.map((state, index) => (
               <div
                 key={index}
                 className={`timeline-block ${
                   state === "execute"
                     ? "green"
-                    : state === "wait"
-                    ? "yellow"
-                    : "red"
+                    : "wait"
                 }`}
-                style={{ animationDelay: `${index * 0.7}s` }}
-              ></div>
+                // Exemplo de delay para animação:
+                style={{ animationDelay: `${index * 0.5}s` }}
+              >
+                {index}
+              </div>
             ))}
           </div>
         </div>
       ))}
+
       <div className="turnaround-info">
         <h4>Turnaround Médio: {turnaroundAvg.toFixed(2)}</h4>
       </div>
