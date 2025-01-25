@@ -9,8 +9,8 @@ import "./style.css";
 function Main() {
   const [numProcesses, setNumProcesses] = useState(1);
   const [algorithm, setAlgorithm] = useState("fifo");
-  const [quantum, setQuantum] = useState(0);
-  const [overhead, setOverhead] = useState(0);
+  const [quantum, setQuantum] = useState(1);
+  const [overhead, setOverhead] = useState(1);
   const [pagination, setPagination] = useState("fifo");
   const [processData, setProcessData] = useState([]);
   const [isSimulationRunning, setIsSimulationRunning] = useState(false); // Estado para controle de execução
@@ -20,7 +20,7 @@ function Main() {
     setNumProcesses(newNum);
     const newProcesses = Array.from({ length: newNum }, (_, index) => ({
       id: index + 1,
-      tempo: 0,
+      tempo: 1,
       paginas: 0,
       deadline: 0,
       chegada: 0,
@@ -41,8 +41,8 @@ function Main() {
   const handleSimulationReset = () => {
     setNumProcesses(1);
     setAlgorithm("fifo");
-    setQuantum(0);
-    setOverhead(0);
+    setQuantum(1);
+    setOverhead(1);
     setPagination("fifo");
     setProcessData([]);
     setIsSimulationRunning(false); // Simulação não está mais em execução
@@ -84,7 +84,7 @@ function Main() {
             Quantum:
             <input
               type="number"
-              min="0"
+              min="0" 
               value={quantum}
               onChange={(e) => setQuantum(Number(e.target.value))}
               disabled={algorithm !== "round_robin"}

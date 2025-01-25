@@ -11,7 +11,7 @@ function ProcessCard({ process, index, onChange, disabled }) {
           Tempo:
           <input
             type="number"
-            min="0"
+            min="1"
             max="20"
             value={process.tempo}
             onChange={(e) => onChange(index, "tempo", e.target.value)}
@@ -22,7 +22,7 @@ function ProcessCard({ process, index, onChange, disabled }) {
           Páginas:
           <input
             type="number"
-            min="0"
+            min="1"
             value={process.paginas}
             onChange={(e) => onChange(index, "paginas", e.target.value)}
             disabled={disabled}
