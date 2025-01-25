@@ -64,7 +64,7 @@ function FIFOSimulation({ processData }) {
         </div>
       ))}
       <div className="turnaround-info">
-        <h4>Turnaround Time Médio: {turnaroundAvg.toFixed(2)}</h4>
+        <h4>Turnaround Médio: {turnaroundAvg.toFixed(2)}</h4>
       </div>
     </div>
   );

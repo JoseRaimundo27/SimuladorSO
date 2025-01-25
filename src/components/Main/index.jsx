@@ -63,6 +63,8 @@ function Main() {
               min="1"
               value={numProcesses}
               onChange={(e) => handleNumProcessesChange(e.target.value)}
+              disabled={isSimulationRunning }
+                
             />
           </label>
           <label>
@@ -71,6 +73,7 @@ function Main() {
               value={algorithm}
               onChange={(e) => setAlgorithm(e.target.value)}
             >
+            
               <option value="fifo">FIFO</option>
               <option value="sjf">SJF</option>
               <option value="edf">EDF</option>
@@ -117,6 +120,7 @@ function Main() {
                 process={process}
                 index={index}
                 onChange={handleProcessDataChange}
+                disabled={isSimulationRunning}
               />
             ))}
           </div>
