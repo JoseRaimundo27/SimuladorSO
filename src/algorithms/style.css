@@ -42,3 +42,17 @@
     background-color: #f44336; /* Overhead */
   }
   
+
+  .timeline-block {
+    opacity: 0; /* Inicialmente invisível */
+    transform: scale(0.8); /* Inicialmente reduzido */
+    animation: fadeInScale 0.3s ease forwards;
+  }
+  
+  /* Animação para entrada gradual */
+  @keyframes fadeInScale {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }

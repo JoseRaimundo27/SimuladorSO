@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../style.css";
 
-function FIFOSimulation({ processData, overhead }) {
+function FIFOSimulation({ processData }) {
   const [simulationData, setSimulationData] = useState([]);
   const [turnaroundAvg, setTurnaroundAvg] = useState(0); // Variável para armazenar o TAT médio
 
@@ -29,19 +29,17 @@ function FIFOSimulation({ processData, overhead }) {
     // Calcular o Turnaround Time e o Turnaround Time médio
     let totalTurnaroundTime = 0;
     processData.forEach((process, index) => {
-      // Tempo de Conclusão = tempo atual após o processamento do processo
       const completionTime = processData
-        .slice(0, index + 1) // Todos os processos até o atual
-        .reduce((acc, p) => acc + p.tempo, 0); // Tempo acumulado de execução
+        .slice(0, index + 1)
+        .reduce((acc, p) => acc + p.tempo, 0);
 
-      const turnaroundTime = completionTime - process.chegada; // TAT = Conclusão - Chegada
+      const turnaroundTime = completionTime - process.chegada;
       totalTurnaroundTime += turnaroundTime;
     });
 
-    // Calcular TAT médio
     const averageTurnaroundTime = totalTurnaroundTime / processData.length;
-    setTurnaroundAvg(averageTurnaroundTime); // Armazenar o valor do TAT médio
-  }, [processData, overhead]);
+    setTurnaroundAvg(averageTurnaroundTime);
+  }, [processData]);
 
   return (
     <div className="simulation-container">
@@ -59,13 +57,14 @@ function FIFOSimulation({ processData, overhead }) {
                     ? "yellow"
                     : "red"
                 }`}
+                style={{ animationDelay: `${index * 0.7}s` }} // Adiciona delay gradual
               ></div>
             ))}
           </div>
         </div>
       ))}
       <div className="turnaround-info">
-        <h4>Turnaround Time Médio: {turnaroundAvg.toFixed(2)}</h4> {/* Exibe o TAT médio */}
+        <h4>Turnaround Time Médio: {turnaroundAvg.toFixed(2)}</h4>
       </div>
     </div>
   );
