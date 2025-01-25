@@ -22,33 +22,7 @@
     display: flex;
     gap: 2px;
   }
-  
-  .timeline-block {
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
-    background-color: lightgray;
-  }
-  
-  .timeline-block.green {
-    background-color: green;
-    color: white;
-  }
-  
-  .timeline-block.yellow {
-    background-color: yellow;
-    color: black;
-  }
-  
-  .timeline-block.light-gray {
-    background-color: lightgray;
-    color: black;
-  }
-  
-  .timeline-block.dark-gray {
-    background-color: darkgray;
-    color: white;
-  }
+
   
   .turnaround-info {
     font-weight: bold;

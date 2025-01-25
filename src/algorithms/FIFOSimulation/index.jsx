@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "../style.css";
+import TimelineBlock from "../../components/TimelineBlock/"; // Importar o novo componente
 
 function FIFOSimulation({ processData }) {
   const [simulationData, setSimulationData] = useState([]);
   const [turnaroundAvg, setTurnaroundAvg] = useState(0);
 
   useEffect(() => {
-    // Ordenar os processos pela hora de chegada
     const sorted = [...processData].sort((a, b) => a.chegada - b.chegada);
 
-    // Determinar o tempo total necessário para a simulação
     let currentFinish = 0;
     const totalTime = sorted.reduce((acc, process) => {
       const start = Math.max(process.chegada, currentFinish);
@@ -18,7 +17,6 @@ function FIFOSimulation({ processData }) {
       return Math.max(acc, finish);
     }, 0);
 
-    // Calcular start e finish de cada processo
     currentFinish = 0;
     sorted.forEach((p) => {
       const start = Math.max(p.chegada, currentFinish);
@@ -28,23 +26,19 @@ function FIFOSimulation({ processData }) {
       currentFinish = finish;
     });
 
-    // Criar o timeline de cada processo
     const simulation = sorted.map((p) => {
-      const timeline = Array(totalTime).fill("idle"); // Inicialmente tudo cinza claro
-
-      // Preencher o timeline com base nos estados
+      const timeline = Array(totalTime).fill("idle");
       for (let t = 0; t < totalTime; t++) {
         if (t < p.chegada) {
-          timeline[t] = "idle"; // Cinza claro antes da chegada
+          timeline[t] = "idle";
         } else if (t >= p.start && t < p.finish) {
-          timeline[t] = "execute"; // Verde durante a execução
+          timeline[t] = "execute";
         } else if (t >= p.finish) {
-          timeline[t] = "completed"; // Cinza escuro após o término
+          timeline[t] = "completed";
         } else {
-          timeline[t] = "wait"; // Amarelo enquanto espera
+          timeline[t] = "wait";
         }
       }
-
       return {
         id: p.id,
         timeline,
@@ -56,7 +50,6 @@ function FIFOSimulation({ processData }) {
 
     setSimulationData(simulation);
 
-    // Calcular o Turnaround Médio
     const totalTurnaround = sorted.reduce((acc, p) => {
       const tat = p.finish - p.chegada;
       return acc + tat;
@@ -73,27 +66,11 @@ function FIFOSimulation({ processData }) {
       {simulationData.map((p) => (
         <div key={p.id} className="process-row">
           <h4>
-            Processo {p.id} (Chegou: {p.arrival}, Início: {p.start}, Término: {p.finish })
+            Processo {p.id} (Chegou: {p.arrival}, Início: {p.start}, Término: {p.finish})
           </h4>
           <div className="process-timeline">
             {p.timeline.map((state, index) => (
-              <div
-                key={index}
-                className={`timeline-block ${
-                  state === "execute"
-                    ? "green"
-                    : state === "wait"
-                    ? "yellow"
-                    : state === "idle"
-                    ? "light-gray"
-                    : state === "completed"
-                    ? "dark-gray"
-                    : ""
-                }`}
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                {index}
-              </div>
+              <TimelineBlock key={index} state={state} index={index} />
             ))}
           </div>
         </div>
