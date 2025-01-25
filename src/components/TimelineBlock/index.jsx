@@ -12,6 +12,8 @@ const TimelineBlock = ({ state, index }) => {
         return "light-gray";
       case "completed":
         return "dark-gray";
+      case "overhead":
+        return "red";
       default:
         return "";
     }

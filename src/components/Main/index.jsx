@@ -140,7 +140,7 @@ function Main() {
 
       {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
       {isSimulationRunning && algorithm === "fifo" && (
-        <FIFOSimulation processData={processData} isSimulationRunning={isSimulationRunning} />
+        <FIFOSimulation processData={processData}  />
       )}
       {isSimulationRunning && algorithm === "sjf" && (
         <SJFSsimulation processData={processData} isSimulationRunning={isSimulationRunning} />
@@ -149,7 +149,7 @@ function Main() {
         <RoundRobinSimulation
           processData={processData}
           quantum={quantum}
-          isSimulationRunning={isSimulationRunning}
+          overhead={overhead}
         />
       )}
       {isSimulationRunning && algorithm === "edf" && (
