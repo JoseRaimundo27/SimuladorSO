@@ -31,15 +31,28 @@
   }
   
   .timeline-block.green {
-    background-color: #4caf50; /* Executando */
+    background-color: green;
+    color: white;
   }
   
   .timeline-block.yellow {
-    background-color: #ffc107; /* Esperando */
+    background-color: yellow;
+    color: black;
   }
   
-  .timeline-block.red {
-    background-color: #f44336; /* Overhead */
+  .timeline-block.light-gray {
+    background-color: lightgray;
+    color: black;
+  }
+  
+  .timeline-block.dark-gray {
+    background-color: darkgray;
+    color: white;
+  }
+  
+  .turnaround-info {
+    font-weight: bold;
+    margin-top: 20px;
   }
   
 
