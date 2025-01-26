@@ -3,7 +3,6 @@ import "./App.css";
 import Header from "./components/Header";
 import Main from "./components/Main";
 
-
 function App() {
   const [count, setCount] = useState(0);
 
@@ -13,13 +12,12 @@ function App() {
         <Header />
       </header>
 
-     
       <main className="main-content">
-        <Main/>
+        <Main />
       </main>
 
       <footer className="footer">
-        <p>MATA58-SISTEMAS OPERACIONAIS</p>
+        <p style={{"marginBottom":"1rem"}}>MATA58-SISTEMAS OPERACIONAIS</p>
       </footer>
     </div>
   );
