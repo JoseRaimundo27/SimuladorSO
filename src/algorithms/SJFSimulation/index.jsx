@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import TimelineBlock from "../../components/TimelineBlock/"; // 
+import TimelineBlock from "../../components/TimelineBlock/"; 
 import "../style.css";
 
 function SJFSimulation({ processData }) {

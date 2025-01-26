@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import TimelineBlock from "../../components/TimelineBlock"; // Importar o componente reutilizável
+import TimelineBlock from "../../components/TimelineBlock"; 
 import "../style.css";
 
 function RoundRobinSimulation({ processData, quantum, overhead }) {

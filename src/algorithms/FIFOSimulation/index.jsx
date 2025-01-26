@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../style.css";
-import TimelineBlock from "../../components/TimelineBlock/"; // Importar o novo componente
+import TimelineBlock from "../../components/TimelineBlock/"; 
 
 function FIFOSimulation({ processData }) {
   const [simulationData, setSimulationData] = useState([]);

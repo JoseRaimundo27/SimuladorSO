@@ -120,6 +120,7 @@ function Main() {
                 process={process}
                 index={index}
                 onChange={handleProcessDataChange}
+                algorithm = {algorithm}
                 disabled={isSimulationRunning}
               />
             ))}
@@ -143,7 +144,7 @@ function Main() {
         <FIFOSimulation processData={processData}  />
       )}
       {isSimulationRunning && algorithm === "sjf" && (
-        <SJFSsimulation processData={processData} isSimulationRunning={isSimulationRunning} />
+        <SJFSsimulation processData={processData} />
       )}
       {isSimulationRunning && algorithm === "round_robin" && (
         <RoundRobinSimulation
@@ -153,7 +154,12 @@ function Main() {
         />
       )}
       {isSimulationRunning && algorithm === "edf" && (
-        <EDFSimulation processData={processData} isSimulationRunning={isSimulationRunning} />
+        <EDFSimulation 
+        processData={processData} 
+        quantum={quantum}
+        overhead={overhead}
+        
+        />
       )}
     </section>
   );
