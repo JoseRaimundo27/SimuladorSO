@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ProcessCard from "./ProcessCard";
+import ProcessCard from "../ProcessCard";
 import FIFOSimulation from "../../algorithms/FIFOSimulation"
 import SJFSsimulation from "../../algorithms/SJFSimulation";
 import RoundRobinSimulation from "../../algorithms/RoundRobinSimulation";
