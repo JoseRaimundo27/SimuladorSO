@@ -1,7 +1,7 @@
 .process-config-card {
     margin-top: 1rem;
     width: 80%;
-    padding: 1rem 0;
+    padding: 1rem 1rem;
     font-weight: 500;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -21,4 +21,3 @@
     align-items: center;
     gap: 1rem;
 }
-
