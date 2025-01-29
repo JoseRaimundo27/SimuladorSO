@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ProcessCard from "../ProcessCard";
 import FIFOSimulation from "../../algorithms/FIFOSimulation"
 import SJFSsimulation from "../../algorithms/SJFSimulation";
@@ -18,14 +18,13 @@ function Main() {
   const SimDialog = useRef(null);
   const FileInput = useRef(null);
   const FileDownload = useRef(null);
-  useState(() => {
+  useEffect(() => {
     fillProcesses(numProcesses);
-  });
+  }, [numProcesses]);
 
   const handleNumProcessesChange = (n) => {
     const newNum = Math.max(1, Number(n));
     setNumProcesses(newNum);
-    fillProcesses(newNum);
   };
 
   function fillProcesses(newNum) {
@@ -98,14 +97,18 @@ function Main() {
   };
 
   const handleSimulationReset = () => {
-    setNumProcesses(1);
     setAlgorithm("fifo");
     setQuantum(1);
     setOverhead(1);
     setPagination("fifo");
     setProcessData([]);
+    setNumProcesses(1);
     setIsSimulationRunning(false); // Simulação não está mais em execução
   };
+
+  function handleModalClose() {
+    setIsSimulationRunning(false); // Simulação não está mais em execução
+  }
 
   const handleStartSimulation = () => {
     setIsSimulationRunning(true); // Inicia a simulação
@@ -196,6 +199,9 @@ function Main() {
           <button type="button" onClick={handleExport}>
             Exportar Configuração
           </button>
+          <button type="button" onClick={handleSimulationReset}>
+            Resetar
+          </button>
           <a ref={FileDownload} download="simulador.json" style={{ display: 'none' }} />
           <input ref={FileInput} type="file" style={{ display: 'none' }} accept="application/JSON" onChange={handleUpload} />
         </div>
@@ -203,7 +209,7 @@ function Main() {
 
       <dialog className="simulation-modal" ref={SimDialog}>
         <div>
-          <button className="simulation-button" type="button" onClick={handleSimulationReset}>
+          <button className="simulation-button" type="button" onClick={handleModalClose}>
             <IoIosClose size={32} />
           </button>
         </div>
