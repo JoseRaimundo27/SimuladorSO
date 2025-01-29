@@ -1,45 +1,48 @@
 .simulation-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin: 1rem 0;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .process-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .process-row h4 {
-    font-size: 1rem;
-    margin: 0;
-  }
-  
-  .process-timeline {
-    display: flex;
-    gap: 2px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+}
 
-  
-  .turnaround-info {
-    font-weight: bold;
-    margin-top: 20px;
-  }
-  
+.process-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
 
-  .timeline-block {
-    opacity: 0; /* Inicialmente invisível */
-    transform: scale(0.8); /* Inicialmente reduzido */
-    animation: fadeInScale 0.3s ease forwards;
+.process-row h4 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.process-timeline {
+  display: flex;
+  gap: 2px;
+}
+
+
+.turnaround-info {
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+
+.timeline-block {
+  opacity: 0;
+  /* Inicialmente invisível */
+  transform: scale(0.8);
+  /* Inicialmente reduzido */
+  animation: fadeInScale 0.3s ease forwards;
+}
+
+/* Animação para entrada gradual */
+@keyframes fadeInScale {
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
-  
-  /* Animação para entrada gradual */
-  @keyframes fadeInScale {
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
+}
