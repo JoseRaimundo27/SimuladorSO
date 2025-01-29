@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import ProcessCard from "../ProcessCard";
 import FIFOSimulation from "../../algorithms/FIFOSimulation"
 import SJFSsimulation from "../../algorithms/SJFSimulation";
 import RoundRobinSimulation from "../../algorithms/RoundRobinSimulation";
 import EDFSimulation from "../../algorithms/EDFSimulation";
 import "./style.css";
+import { IoIosClose } from "react-icons/io";
 
 function Main() {
   const [numProcesses, setNumProcesses] = useState(1);
@@ -14,19 +15,77 @@ function Main() {
   const [pagination, setPagination] = useState("fifo");
   const [processData, setProcessData] = useState([]);
   const [isSimulationRunning, setIsSimulationRunning] = useState(false); // Estado para controle de execução
+  const SimDialog = useRef(null);
+  const FileInput = useRef(null);
+  const FileDownload = useRef(null);
+  useState(() => {
+    fillProcesses(numProcesses);
+  });
 
   const handleNumProcessesChange = (n) => {
     const newNum = Math.max(1, Number(n));
     setNumProcesses(newNum);
-    const newProcesses = Array.from({ length: newNum }, (_, index) => ({
-      id: index + 1,
-      tempo: 1,
-      paginas: 0,
-      deadline: 0,
-      chegada: 0,
-    }));
-    setProcessData(newProcesses);
+    fillProcesses(newNum);
   };
+
+  function fillProcesses(newNum) {
+    const offset = newNum - processData.length;
+    if (offset >= 0) {
+      const newProcesses = Array.from({ length: offset }, (_, index) => ({
+        id: processData.length + index + 1,
+        tempo: 1,
+        paginas: 0,
+        deadline: 0,
+        chegada: 0,
+      }));
+      setProcessData(processData.concat(newProcesses));
+    }
+    else if (offset < 0) {
+      setProcessData(processData.slice(0, processData.length + offset));
+    }
+  }
+
+  function handleExport() {
+    const headConfig = {
+      algorithm: algorithm,
+      quantum: quantum,
+      overhead: overhead,
+      pagination: pagination,
+      processData: processData
+    }
+
+    FileDownload.current?.setAttribute('href', 'data:application/json;charset=utf-8,' + JSON.stringify(headConfig));
+
+    FileDownload.current?.click();
+  }
+
+  function handleImport() {
+    FileInput.current?.click();
+  }
+
+  function handleUpload() {
+    const file = FileInput.current?.files[0];
+    if (file == null || file === "")
+      return;
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+      const obj = JSON.parse(event.target.result);
+      if (obj.algorithm)
+        setAlgorithm(obj.algorithm)
+      if (obj.quantum)
+        setQuantum(obj.quantum)
+      if (obj.overhead)
+        setOverhead(obj.overhead)
+      if (obj.pagination)
+        setPagination(obj.pagination)
+      if (obj.processData)
+        setProcessData(obj.processData)
+    };
+
+    reader.readAsText(file);
+  }
 
   const handleProcessDataChange = (index, field, value) => {
     if (index === 0 && field === "chegada") {
@@ -63,8 +122,8 @@ function Main() {
               min="1"
               value={numProcesses}
               onChange={(e) => handleNumProcessesChange(e.target.value)}
-              disabled={isSimulationRunning }
-                
+              disabled={isSimulationRunning}
+
             />
           </label>
           <label>
@@ -73,7 +132,7 @@ function Main() {
               value={algorithm}
               onChange={(e) => setAlgorithm(e.target.value)}
             >
-            
+
               <option value="fifo">FIFO</option>
               <option value="sjf">SJF</option>
               <option value="edf">EDF</option>
@@ -84,7 +143,7 @@ function Main() {
             Quantum:
             <input
               type="number"
-              min="0" 
+              min="0"
               value={quantum}
               onChange={(e) => setQuantum(Number(e.target.value))}
               disabled={algorithm !== "round_robin"}
@@ -120,7 +179,7 @@ function Main() {
                 process={process}
                 index={index}
                 onChange={handleProcessDataChange}
-                algorithm = {algorithm}
+                algorithm={algorithm}
                 disabled={isSimulationRunning}
               />
             ))}
@@ -131,36 +190,47 @@ function Main() {
           <button type="button" onClick={handleStartSimulation}>
             Rodar Simulação
           </button>
-
-          <button type="button" onClick={handleSimulationReset}>
-            Resetar Simulação
+          <button type="button" onClick={handleImport}>
+            Importar Configuração
           </button>
-
+          <button type="button" onClick={handleExport}>
+            Exportar Configuração
+          </button>
+          <a ref={FileDownload} download="simulador.json" style={{ display: 'none' }} />
+          <input ref={FileInput} type="file" style={{ display: 'none' }} accept="application/JSON" onChange={handleUpload} />
         </div>
       </form>
 
-      {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
-      {isSimulationRunning && algorithm === "fifo" && (
-        <FIFOSimulation processData={processData}  />
-      )}
-      {isSimulationRunning && algorithm === "sjf" && (
-        <SJFSsimulation processData={processData} />
-      )}
-      {isSimulationRunning && algorithm === "round_robin" && (
-        <RoundRobinSimulation
-          processData={processData}
-          quantum={quantum}
-          overhead={overhead}
-        />
-      )}
-      {isSimulationRunning && algorithm === "edf" && (
-        <EDFSimulation 
-        processData={processData} 
-        quantum={quantum}
-        overhead={overhead}
-        
-        />
-      )}
+      <dialog className="simulation-modal" ref={SimDialog}>
+        <div>
+          <button className="simulation-button" type="button" onClick={handleSimulationReset}>
+            <IoIosClose size={32} />
+          </button>
+        </div>
+        {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
+        {isSimulationRunning && algorithm === "fifo" && (
+          <FIFOSimulation processData={processData} />
+        )}
+        {isSimulationRunning && algorithm === "sjf" && (
+          <SJFSsimulation processData={processData} />
+        )}
+        {isSimulationRunning && algorithm === "round_robin" && (
+          <RoundRobinSimulation
+            processData={processData}
+            quantum={quantum}
+            overhead={overhead}
+          />
+        )}
+        {isSimulationRunning && algorithm === "edf" && (
+          <EDFSimulation
+            processData={processData}
+            quantum={quantum}
+            overhead={overhead}
+
+          />
+        )}
+      </dialog>
+      {isSimulationRunning ? SimDialog.current?.showModal() : SimDialog.current?.close()}
     </section>
   );
 }
