@@ -1,13 +1,34 @@
 let pageCounter = 0;
 
 export class Page {
+    victim = false;
+    loading = false;
+    using = false;
+
+    markAsVictim() {
+        return { ...this, victim: true };
+    }
+
+    markAsLoading() {
+        return { ...this, loading: true };
+    }
+
+    markAsUsing() {
+        this.lastAccessTime = pageCounter;
+        return { ...this, using: true };
+    }
+
     constructor(name) {
         this.name = name;
         this.creationTime = pageCounter;
         this.lastAccessTime = pageCounter;
-        pageCounter ++;
+        pageCounter++;
     }
 }
+
+export const PAGE_SIZE = 4;
+export const MEMORY_SIZE = 200;
+export const MEMORY_CAPACITY = Math.ceil(MEMORY_SIZE / PAGE_SIZE);
 
 export class Memory {
     /**
@@ -29,25 +50,46 @@ export class Memory {
      * @type {{ pages: (Page|null)[], disk: (Page|null)[] }[]}
      */
     history = [];
-    
+
     /**
      * @param {number} size 
      * @param {number} pageSize 
      * @param {'fifo'|'lru'} alogirthm 
      */
-    constructor(alogirthm = 'fifo', size = 200, pageSize = 4) {
+    constructor(alogirthm = 'fifo') {
         this.algorithm = alogirthm;
-        this.capacity = Math.ceil(size / pageSize);
-        this.pages = new Array(this.capacity).fill(null);
+        this.pages = new Array(MEMORY_CAPACITY).fill(null);
         this.disk = [];
     }
 
-    saveHistory(count = 1) {
-        for (let i = 0; i < count; i++) {
-            this.history.push({
-                pages: [...this.pages],
-                disk: [...this.disk]
-            });
+    /**
+     * @param {any} proccessName 
+     * @param {"page_fault"|undefined} pageFault 
+     */
+    saveHistory(proccessName = null, pageFault) {
+        const last = this.history[this.history.length - 1];
+        const incoming = {
+            pages: [...this.pages],
+            disk: [...this.disk]
+        };
+
+        this.history.push(incoming);
+
+        for (let i = 0; i < incoming.pages.length; i++) {
+            const newPage = incoming?.pages[i];
+            const oldPage = last?.pages[i];
+
+            if (newPage && newPage.name === proccessName) {
+                if (pageFault) {
+                    incoming.pages[i] = newPage.markAsLoading();
+                } else {
+                    incoming.pages[i] = newPage.markAsUsing();
+                }
+            } 
+            
+            if (oldPage && newPage && newPage.name !== oldPage?.name) {
+                last.pages[i] = oldPage.markAsVictim();
+            }
         }
     }
 
@@ -64,7 +106,8 @@ export class Memory {
             let pageIndex = this.pages.findIndex((p) => p === null);
 
             if (pageIndex < 0) {
-                pageFaultCounter ++;
+                this.saveHistory(proccessName, "page_fault");
+                pageFaultCounter++;
                 pageIndex = this.#killPage();
             }
 
@@ -75,8 +118,6 @@ export class Memory {
             if (this.disk.includes(newPage)) {
                 this.disk.splice(this.disk.indexOf(newPage), 1);
             }
-
-            this.saveHistory();
         }
 
         return pageFaultCounter;
@@ -84,7 +125,7 @@ export class Memory {
 
     #killPage() {
         switch (this.algorithm.toLowerCase()) {
-            case 'fifo':   
+            case 'fifo':
             default:
                 return this.#killPageFIFO();
             case 'lru':

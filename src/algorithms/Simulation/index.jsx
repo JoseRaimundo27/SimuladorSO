@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import "../style.css";
 import TimelineBlock from "../../components/TimelineBlock/";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
 import { RiResetLeftFill } from "react-icons/ri";
 import { Memory } from "../../memory/memory";
+
+import "../style.css";
 
 export default function Simulation({ algorithm, processData, quantum = 1, overhead = 1, pagination }) {
     const [simulationData, setSimulationData] = useState([]);
@@ -16,7 +17,8 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     const [speed, setSpeed] = useState(1);
     const [simulationState, setSimulationState] = useState('paused');
 
-    const memory = new Memory(pagination);
+    const memory = useRef(new Memory(pagination));
+    const currentMemory = memory.current.history[majorTime];
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -70,7 +72,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 }
 
                 if (currentProcess) {
-                    const pageFaults = memory.load(currentProcess.id, currentProcess.paginas);
+                    const pageFaults = memory.current.load(currentProcess.id, currentProcess.paginas);
                     time += pageFaults;
                     currentProcess.timeline.push(...Array(pageFaults).fill('loading'));
                 }
@@ -95,11 +97,12 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     p.timeline.push('wait');
                 }
             });
-            memory.saveHistory();
+            memory.current.saveHistory(currentProcess?.id);
             time++;
             if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
             if (remainQuantum < 0 && remainOverhead === 0 || currentProcess?.remainTime === 0) remainQuantum = quantum;
         }
+        memory.current.saveHistory(currentProcess?.id);
         setSimulationData(processData);
         setFinalTime(time);
     }, [])
@@ -172,6 +175,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     }
     function handleReset() {
         moment.current = 0;
+        // memory.current = new Memory(pagination);
         setMajorTime(0);
         setMinorTime(0);
         setSimulationState("paused");
@@ -235,6 +239,32 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             <div className="turnaround-info">
                 <h4>Turnaround Médio: {getAVGTurnaround(majorTime).toFixed(2)}</h4>
             </div>
+            {currentMemory && <div className="memory-info">
+                <div className="memory-container">
+                    <div className="memory-state">
+                        <div>Memória</div>
+                        <div className="memory-row">
+                            {currentMemory.pages.map((page, index) => (
+                                <div key={index} className={
+                                    `memory-page ${page ? 'filled' : ''} 
+                                    ${page?.using ? 'using' : ''} 
+                                    ${page?.loading ? 'loading' : ''}
+                                    ${page?.victim ? 'victim' : ''}
+                                `}>
+                                    {page?.name ?? " "}
+                                </div>
+                            ))}
+                        </div>
+                        {/* <div className="memory-row">
+                            {currentMemory.disk.map((page, index) => (
+                                <div key={index} className={`memory-page ${page ? 'filled' : ''}`}>
+                                    {page?.name ?? "-"}
+                                </div>
+                            ))}
+                        </div> */}
+                    </div>
+                </div>
+            </div>}
         </>
     );
 }

@@ -1,6 +1,7 @@
 // ProcessCard.js
 import React from "react";
 import "./style.css";
+import { MEMORY_CAPACITY } from "../../memory/memory";
 
 function ProcessCard({ process, index, onChange, algorithm, disabled }) {
   return (
@@ -23,6 +24,7 @@ function ProcessCard({ process, index, onChange, algorithm, disabled }) {
           <input
             type="number"
             min="1"
+            max={MEMORY_CAPACITY}
             value={process.paginas}
             onChange={(e) => onChange(index, "paginas", e.target.value)}
             disabled={disabled}
