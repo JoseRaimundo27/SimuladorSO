@@ -149,7 +149,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
 
         simulationData.map(p => {
             for (var i = 0; i < time && i < p.timeline.length; i++) {
-                if (['wait', 'over', 'exe'].includes(p.timeline[i]))
+                if (['wait', 'over', 'exe', 'loading'].includes(p.timeline[i]))
                     turnaround++;
             }
         });
