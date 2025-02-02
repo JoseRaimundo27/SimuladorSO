@@ -30,7 +30,7 @@ function ProcessCard({ process, index, onChange, algorithm, disabled }) {
           <input
             type="number"
             min="1"
-            max={MEMORY_CAPACITY}
+            max="10"
             value={process.paginas}
             onChange={(e) => onChange(index, "paginas", e.target.value)}
             disabled={disabled}
