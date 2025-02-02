@@ -9,40 +9,62 @@
   
 }
 
+div p{
+  font-weight: bold;
+}
+
 .timeline-block.invisible {
   background-color: white !important;
+}
+.timeline-block.invisible p {
+  display: none;
 }
 
 .timeline-block.progress {
   background-color: white !important;
+}
+.timeline-block.progress p{
+  display: none;
 }
 
 .timeline-block.green {
   background-color: green;
   color: white;
 }
+.timeline-block.green p {
+  display: block;
+}
 
 .timeline-block.yellow {
-  background-color: yellow;
-  color: black;
+  background-color: rgb(207, 207, 1);
+  color: white;
+  
+}
+.timeline-block.yellow p {
+  display: block;
+  color: white;
 }
 
 .timeline-block.light-gray {
   background-color: lightgray;
   color: black;
 }
+.timeline-block.light-gray p {
+  display: block;
+}
 
 .timeline-block.dark-gray {
   background-color: rgb(95, 95, 95);
   color: white;
+}
+.timeline-block.dark-gray p {
+  display: block; /* ou inline, conforme necessário */
 }
 
 .timeline-block.red {
   background-color: red;
   color: white;
 }
-
-div p{
-    font-weight: bold;
-  
+.timeline-block.red p {
+  display: block; /* ou inline, conforme necessário */
 }
