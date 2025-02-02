@@ -57,33 +57,40 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         
         while (true) {
             var activeProcesses = processData.filter(p => p.remainTime > 0);
+            var idleProcesses = processData.filter(p => p.chegada > time);
 
             if (currentProcess?.remainTime <= 0) {
                 memory.current.unload(currentProcess.id);
             }
 
-            if (remainQuantum === quantum && remainOverhead <= 0 || currentProcess?.remainTime <= 0) {
+            if (remainQuantum === quantum && remainOverhead <= 0 || !currentProcess?.remainTime) {
                 activeProcesses = activeProcesses.filter(p => p.chegada <= time);
 
-                if (algorithm === "round_robin") {
-                    if (activeProcesses.filter(p => !p.marked).length === 0) {
-                        activeProcesses.map(p => p.marked = false);
+                if (activeProcesses.length) {
+                    if (algorithm === "round_robin") {
+                        if (activeProcesses.filter(p => !p.marked).length === 0) {
+                            activeProcesses.map(p => p.marked = false);
+                        }
+                        activeProcesses = activeProcesses.filter(p => !p.marked)
                     }
-                    activeProcesses = activeProcesses.filter(p => !p.marked)
-                }
 
-                if (algorithm === "fifo" || algorithm === "round_robin") {
-                    currentProcess = activeProcesses.sort((p, q) => p.chegada - q.chegada)[0];
-                }
-                else if (algorithm === "sjf") {
-                    currentProcess = activeProcesses.sort((p, q) => p.tempo - q.tempo)[0];
-                }
-                else if (algorithm === "edf") {
-                    currentProcess = activeProcesses.sort((p, q) => p.deadline - q.deadline)[0];
-                }
+                    if (algorithm === "fifo" || algorithm === "round_robin") {
+                        currentProcess = activeProcesses.sort((p, q) => p.chegada - q.chegada)[0];
+                    }
+                    else if (algorithm === "sjf") {
+                        currentProcess = activeProcesses.sort((p, q) => p.tempo - q.tempo)[0];
+                    }
+                    else if (algorithm === "edf") {
+                        currentProcess = activeProcesses.sort((p, q) => p.deadline - q.deadline)[0];
+                    }
 
-                if (currentProcess && currentProcess.id !== lastCurrentProcess?.id) {
-                    currentProcess.pageFaults = memory.current.load(currentProcess.id, currentProcess.paginas);
+                    if (currentProcess && currentProcess.id !== lastCurrentProcess?.id) {
+                        currentProcess.pageFaults = memory.current.load(currentProcess.id, currentProcess.paginas);
+                    }
+                } 
+                else {
+                    currentProcess = null;
+                    memory.current.saveHistory();
                 }
             }
 
@@ -119,14 +126,15 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             if (remainQuantum < 0 && remainOverhead <= 0 || currentProcess?.remainTime <= 0) remainQuantum = quantum;
             
             time++;
-            if (activeProcesses.length === 0) break;
+            if (!activeProcesses.length && !idleProcesses.length) break;
+            if (time > 1000) break;
         }
 
         memory.current.saveHistory();
         
-        // processData.forEach(p => {
-        //     if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
-        // });
+        processData.forEach(p => {
+            if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
+        });
 
         setSimulationData(processData);
         setFinalTime(time);
