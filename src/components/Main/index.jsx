@@ -6,6 +6,7 @@ import RoundRobinSimulation from "../../algorithms/RoundRobinSimulation";
 import EDFSimulation from "../../algorithms/EDFSimulation";
 import "./style.css";
 import { IoIosClose } from "react-icons/io";
+import Simulation from "../../algorithms/Simulation";
 
 function Main() {
   const [numProcesses, setNumProcesses] = useState(1);
@@ -174,7 +175,7 @@ function Main() {
         </div>
 
         <div className="process-config">
-          <h3>Configuração dos Processos</h3>
+          <h3 style={{ marginBottom: "1rem" }}>Configuração dos Processos</h3>
           <div className="process-config-cards_container">
             {processData.map((process, index) => (
               <ProcessCard
@@ -208,33 +209,16 @@ function Main() {
       </form>
 
       <dialog className="simulation-modal" ref={SimDialog}>
-        <div>
+        <div className="simulation-modal-header">
           <button className="simulation-button" type="button" onClick={handleModalClose}>
             <IoIosClose size={32} />
           </button>
         </div>
         {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
-        {isSimulationRunning && algorithm === "fifo" && (
-          <FIFOSimulation processData={processData} />
+        {isSimulationRunning && (
+          <Simulation algorithm={algorithm} processData={processData} quantum={quantum} overhead={overhead} />
         )}
-        {isSimulationRunning && algorithm === "sjf" && (
-          <SJFSsimulation processData={processData} />
-        )}
-        {isSimulationRunning && algorithm === "round_robin" && (
-          <RoundRobinSimulation
-            processData={processData}
-            quantum={quantum}
-            overhead={overhead}
-          />
-        )}
-        {isSimulationRunning && algorithm === "edf" && (
-          <EDFSimulation
-            processData={processData}
-            quantum={quantum}
-            overhead={overhead}
 
-          />
-        )}
       </dialog>
       {isSimulationRunning ? SimDialog.current?.showModal() : SimDialog.current?.close()}
     </section>

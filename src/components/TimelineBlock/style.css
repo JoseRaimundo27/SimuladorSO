@@ -1,31 +1,39 @@
 .timeline-block {
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
-    background-color: lightgray;
-  }
-  
-  .timeline-block.green {
-    background-color: green;
-    color: white;
-  }
-  
-  .timeline-block.yellow {
-    background-color: yellow;
-    color: black;
-  }
-  
-  .timeline-block.light-gray {
-    background-color: lightgray;
-    color: black;
-  }
-  
-  .timeline-block.dark-gray {
-    background-color: rgb(95, 95, 95);
-    color: white;
-  }
+  width: 70px;
+  height: 3rem;
+  background-color: lightgray;
+  box-sizing: border-box;
+}
 
-  .timeline-block.red {
-    background-color: red;
-    color: white;
-  }
+.timeline-block.invisible {
+  background-color: white !important;
+}
+
+.timeline-block.progress {
+  background-color: white !important;
+}
+
+.timeline-block.green {
+  background-color: green;
+  color: white;
+}
+
+.timeline-block.yellow {
+  background-color: yellow;
+  color: black;
+}
+
+.timeline-block.light-gray {
+  background-color: lightgray;
+  color: black;
+}
+
+.timeline-block.dark-gray {
+  background-color: rgb(95, 95, 95);
+  color: white;
+}
+
+.timeline-block.red {
+  background-color: red;
+  color: white;
+}
