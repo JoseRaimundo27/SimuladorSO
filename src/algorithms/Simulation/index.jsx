@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import TimelineBlock from "../../components/TimelineBlock/";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
-import { RiResetLeftFill } from "react-icons/ri";
+import { RiResetLeftFill, RiResetRightFill } from "react-icons/ri";
 import { Memory, MEMORY_CAPACITY, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory";
 
 import "../style.css";
@@ -212,8 +212,13 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     }
     function handleReset() {
         moment.current = 0;
-        // memory.current = new Memory(pagination);
         setMajorTime(0);
+        setMinorTime(0);
+        setSimulationState("paused");
+    }
+    function handleFinish() {
+        moment.current = finalTime;
+        setMajorTime(finalTime);
         setMinorTime(0);
         setSimulationState("paused");
     }
@@ -221,7 +226,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     const ramUsageText = currentMemory ? 
         `(${currentMemory.pages.filter(p => p).length * PAGE_SIZE} KB / ${MEMORY_SIZE} KB)` 
         : '';
-        
+
     const diskUsageText = currentMemory ?
         `(${currentMemory.disk.filter(p => p).length * PAGE_SIZE} KB / ${memory.current.diskLength * PAGE_SIZE} KB)`
         : '';
@@ -230,6 +235,9 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         <>
             <h3>Simulação {algorithm.toUpperCase()}</h3>
             <div>
+                <button className="simulation-controller-button" onClick={handleReset}>
+                    <RiResetLeftFill size={32} />
+                </button>
                 <button
                     className="simulation-controller-button"
                     disabled={simulationState !== 'paused' || majorTime === 0 && minorTime === 0}
@@ -249,8 +257,8 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     onClick={handleNext}>
                     <MdSkipNext size={32} />
                 </button>
-                <button className="simulation-controller-button" onClick={handleReset}>
-                    <RiResetLeftFill size={32} />
+                <button className="simulation-controller-button" onClick={handleFinish}>
+                    <RiResetRightFill size={32} />
                 </button>
             </div>
             <div className="simulation-speed">
