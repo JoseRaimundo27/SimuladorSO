@@ -11,6 +11,10 @@
     min-height: fit-content;
 }
 
+.process-config-label.disabled {
+    opacity: 0.4;
+}
+
 .card-labels {
     display: flex;
     justify-content: space-evenly;

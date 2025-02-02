@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import ProcessCard from "../ProcessCard";
-import FIFOSimulation from "../../algorithms/FIFOSimulation"
-import SJFSsimulation from "../../algorithms/SJFSimulation";
-import RoundRobinSimulation from "../../algorithms/RoundRobinSimulation";
-import EDFSimulation from "../../algorithms/EDFSimulation";
-import "./style.css";
 import { IoIosClose } from "react-icons/io";
 import Simulation from "../../algorithms/Simulation";
+
+import "./style.css";
 
 function Main() {
   const [numProcesses, setNumProcesses] = useState(1);
@@ -34,7 +31,7 @@ function Main() {
       const newProcesses = Array.from({ length: offset }, (_, index) => ({
         id: processData.length + index + 1,
         tempo: 1,
-        paginas: 0,
+        paginas: 1,
         deadline: 0,
         chegada: 0,
       }));
@@ -216,7 +213,7 @@ function Main() {
         </div>
         {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
         {isSimulationRunning && (
-          <Simulation algorithm={algorithm} processData={processData} quantum={quantum} overhead={overhead} />
+          <Simulation {...{algorithm, processData, quantum, overhead, pagination}} />
         )}
 
       </dialog>
