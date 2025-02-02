@@ -1,27 +1,46 @@
 .simulation-container {
+  text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   margin: 1rem 0;
-  justify-content: center;
-  align-items: center;
-  width: fit-content;
+  /* align-items: center; */
+  width: 100%;
+  max-height: 60vh;
+  overflow-x: auto;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.simulation-speed input {
+  vertical-align: middle;
+  width: 2rem;
+}
+
+.simulation-speed input:disabled svg {
+  color: gray;
+}
+
+.simulation-speed input[type=range] {
+  width: 3rem;
+  padding: 0;
 }
 
 .process-row {
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
+  height: 3rem;
 }
 
 .process-row h4 {
   font-size: 1rem;
+  min-width: 200px;
   margin: 0;
+
 }
 
 .process-timeline {
   display: flex;
-  gap: 2px;
+  align-items: stretch;
 }
 
 
@@ -32,17 +51,5 @@
 
 
 .timeline-block {
-  opacity: 0;
-  /* Inicialmente invisível */
-  transform: scale(0.8);
-  /* Inicialmente reduzido */
-  animation: fadeInScale 0.3s ease forwards;
-}
-
-/* Animação para entrada gradual */
-@keyframes fadeInScale {
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  border: 1px solid black;
 }
