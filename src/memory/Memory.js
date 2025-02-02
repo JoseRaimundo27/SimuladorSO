@@ -10,10 +10,16 @@ export class Page {
 }
 
 export class Memory {
+    /**
+     * @param {number} size 
+     * @param {number} pageSize 
+     * @param {'fifo'|'lru'} alogirthm 
+     */
     constructor(size = 200, pageSize = 4, alogirthm = 'fifo') {
         this.algorithm = alogirthm;
         this.capacity = Math.ceil(size / pageSize);
         this.pages = new Array(this.capacity).fill(null);
+        this.disk = [];
     }
 
     load(proccessName, numPages = 10) {
@@ -33,7 +39,13 @@ export class Memory {
                 pageIndex = this.killPage();
             }
 
-            this.pages[pageIndex] = new Page(proccessName);
+            const newPage = new Page(proccessName);
+
+            this.pages[pageIndex] = newPage;
+
+            if (this.disk.includes(newPage)) {
+                this.disk.splice(this.disk.indexOf(newPage), 1);
+            }
         }
 
         return pageFaultCounter;
@@ -60,6 +72,10 @@ export class Memory {
         const index = this.pages.indexOf(oldestPage);
         this.pages[index] = null;
 
+        if (!this.disk.includes(oldestPage)) {
+            this.disk.push(oldestPage);
+        }
+
         return index;
     }
 
@@ -73,6 +89,10 @@ export class Memory {
 
         const index = this.pages.indexOf(oldestPage);
         this.pages[index] = null;
+
+        if (!this.disk.includes(oldestPage)) {
+            this.disk.push(oldestPage);
+        }
 
         return index;
     }
