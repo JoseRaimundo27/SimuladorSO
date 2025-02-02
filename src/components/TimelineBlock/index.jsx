@@ -2,12 +2,14 @@ import React from "react";
 import "./style.css";
 
 const TimelineBlock = ({ state, index, majorTime, minorTime }) => {
-  const getClassName = (state) => {
+  function getClassName(state) {
     switch (state) {
       case "exe":
         return "green";
       case "wait":
         return "yellow";
+      case "loading":
+        return "orange";
       case "idle":
         return "light-gray";
       case "end":
@@ -19,12 +21,14 @@ const TimelineBlock = ({ state, index, majorTime, minorTime }) => {
     }
   };
 
-  function getColor() {
+  function getColor(state) {
     switch (state) {
       case "exe":
         return "green";
       case "wait":
         return "yellow";
+      case "loading":
+        return "orange";
       case "idle":
         return "lightgray";
       case "end":
@@ -41,7 +45,7 @@ const TimelineBlock = ({ state, index, majorTime, minorTime }) => {
       key={index}
       className={`timeline-block ${getClassName(state)} ${index > majorTime ? "invisible" : ""} ${index === majorTime ? "progress" : ""}`}
     >
-      {index === majorTime && (<div className="timeline-progress" style={{ height: "100%", width: `${minorTime * 100}%`, backgroundColor: `${getColor()}` }}></div>)}
+      {index === majorTime && (<div className={`timeline-progress ${getClassName(state)}`} style={{ height: "100%", width: `${minorTime * 100}%` }}></div>)}
       <p >
       {index}
       </p>

@@ -11,6 +11,14 @@
   flex-grow: 1;
 }
 
+.simulation-speed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
 .simulation-speed input {
   vertical-align: middle;
   width: 2rem;
@@ -21,8 +29,9 @@
 }
 
 .simulation-speed input[type=range] {
-  width: 3rem;
+  width: 6rem;
   padding: 0;
+  margin-right: 0.5rem;
 }
 
 .process-row {
@@ -33,9 +42,13 @@
 
 .process-row h4 {
   font-size: 1rem;
-  min-width: 200px;
+  min-width: 100px;
   margin: 0;
+  text-align: left;
+}
 
+.process-row h4 strong {
+  font-weight: bold;
 }
 
 .process-timeline {

@@ -9,11 +9,13 @@ import { Memory } from "../../memory/memory";
 export default function Simulation({ algorithm, processData, quantum = 1, overhead = 1, pagination }) {
     const [simulationData, setSimulationData] = useState([]);
     const moment = useRef(0);
+    const lastTick = useRef(Date.now());
     const [majorTime, setMajorTime] = useState(0);
     const [minorTime, setMinorTime] = useState(0);
     const [finalTime, setFinalTime] = useState(0);
     const [speed, setSpeed] = useState(1);
     const [simulationState, setSimulationState] = useState('paused');
+
     const memory = new Memory(pagination);
 
     useEffect(() => {
@@ -23,7 +25,9 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             if (simulationState != 'running')
                 return;
 
-            moment.current = moment.current + 0.05 * speed;
+            moment.current += (Date.now() - lastTick.current) * speed / 1000;
+            lastTick.current = Date.now();
+
             var mj = Math.floor(moment.current);
             setMinorTime(moment.current - mj);
             if (mj != majorTime) {
@@ -32,6 +36,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         }, 50);
         return () => clearInterval(interval);
     }, [finalTime, majorTime, simulationState, speed])
+
     useEffect(() => {
         var time = 0;
         processData.forEach(p => {
@@ -67,7 +72,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 if (currentProcess) {
                     const pageFaults = memory.load(currentProcess.id, currentProcess.paginas);
                     time += pageFaults;
-                    if (pageFaults) currentProcess.timeline.push(...Array(pageFaults).fill('wait'));
+                    currentProcess.timeline.push(...Array(pageFaults).fill('loading'));
                 }
             }
 
@@ -124,6 +129,8 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 return "Em Execução";
             case 'wait':
                 return "Em Espera";
+            case 'loading':
+                return "Falha de página";
             case 'over':
                 return "Sobrecarga";
             case 'idle':
@@ -137,10 +144,13 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         setSpeed(e.target.value);
     }
     function handleTogglePlay() {
-        if (simulationState === 'running')
+        if (simulationState === 'running') {
             setSimulationState('paused');
-        else
+        }
+        else {
+            lastTick.current = Date.now();
             setSimulationState('running');
+        }
     }
     function handlePrevious() {
         if (majorTime > 0) {
@@ -169,7 +179,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
 
     return (
         <>
-            <h3>Simulação {algorithm}</h3>
+            <h3>Simulação {algorithm.toUpperCase()}</h3>
             <div>
                 <button
                     className="simulation-controller-button"
@@ -195,23 +205,28 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 </button>
             </div>
             <div className="simulation-speed">
-                <input disabled={simulationState !== 'paused'} type="range" id="speed" name="speed" min="0.1" max="2" step="0.1" onChange={handleChangeSpeed} />
-                <label htmlFor="speed">Clock Speed: {parseFloat(speed).toFixed(1)} Tempo: {majorTime}</label>
+                <div>
+                    <input disabled={simulationState !== 'paused'} type="range" id="speed" name="speed" min="0.1" max="2" step="0.1" onChange={handleChangeSpeed} />
+                    <label htmlFor="speed">Clock Speed: {parseFloat(speed).toFixed(1)}</label>
+                </div>
+                <span>
+                    Tempo: {majorTime}
+                </span>
             </div>
             <div className="simulation-container">
 
                 {simulationData.map((p) => (
                     <div key={p.id} className="process-row">
                         <h4>
-                            Processo {p.id}
+                            <strong>Processo {p.id}</strong>
                             <br></br>
                             {getStatus(p, majorTime)}
                         </h4>
                         <div className="process-timeline">
                             {p.timeline.map((state, index) => (
-                                <TimelineBlock key={index} state={state} index={index} majorTime={majorTime} minorTime={minorTime} />
+                                <TimelineBlock key={index} {...{ state, index, majorTime, minorTime }} />
                             ))}
-                            
+
                         </div>
                     </div>
                 ))}
