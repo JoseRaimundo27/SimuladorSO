@@ -49,6 +49,8 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         var remainQuantum = quantum;
         var currentProcess = null;
         var remainOverhead = 0;
+        var maxLength = 0;
+        
         while (true) {
             var activeProcesses = processData.filter(p => p.remainTime > 0);
             if (activeProcesses.length === 0) break;
@@ -99,9 +101,15 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             });
             memory.current.saveHistory(currentProcess?.id);
             time++;
+            maxLength = Math.max(maxLength, time);
             if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
             if (remainQuantum < 0 && remainOverhead === 0 || currentProcess?.remainTime === 0) remainQuantum = quantum;
         }
+
+        processData.forEach(p => {
+            if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
+        });
+
         memory.current.saveHistory(currentProcess?.id);
         setSimulationData(processData);
         setFinalTime(time);
@@ -230,7 +238,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                             {p.timeline.map((state, index) => (
                                 <TimelineBlock key={index} {...{ state, index, majorTime, minorTime }} />
                             ))}
-
                         </div>
                     </div>
                 ))}

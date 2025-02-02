@@ -93,7 +93,7 @@ export class Memory {
         }
     }
 
-    load(proccessName, numPages = 10) {
+    load(proccessName, numPages) {
         let pageFaultCounter = 0;
 
         this.pages.forEach((page) => {
