@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../style.css";
-import TimelineBlock from "../../components/TimelineBlock/"; 
+import TimelineBlock from "../../components/TimelineBlock/";
 
 function FIFOSimulation({ processData }) {
   const [simulationData, setSimulationData] = useState([]);
@@ -57,29 +57,31 @@ function FIFOSimulation({ processData }) {
 
     const averageTurnaround = totalTurnaround / sorted.length;
     setTurnaroundAvg(averageTurnaround);
-  }, [processData]);
+  }, []);
 
   return (
-    <div className="simulation-container">
+    <>
       <h3>Simulação FIFO</h3>
+      <div className="simulation-container">
 
-      {simulationData.map((p) => (
-        <div key={p.id} className="process-row">
-          <h4>
-            Processo {p.id} (Chegou: {p.arrival}, Início: {p.start}, Término: {p.finish})
-          </h4>
-          <div className="process-timeline">
-            {p.timeline.map((state, index) => (
-              <TimelineBlock key={index} state={state} index={index} />
-            ))}
+        {simulationData.map((p) => (
+          <div key={p.id} className="process-row">
+            <h4>
+              Processo {p.id} (Chegou: {p.arrival}, Início: {p.start}, Término: {p.finish})
+            </h4>
+            <div className="process-timeline">
+              {p.timeline.map((state, index) => (
+                <TimelineBlock key={index} state={state} index={index} />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
 
+      </div>
       <div className="turnaround-info">
         <h4>Turnaround Médio: {turnaroundAvg.toFixed(2)}</h4>
       </div>
-    </div>
+    </>
   );
 }
 
