@@ -23,6 +23,11 @@ export class Page {
         return clone;
     }
 
+    access() {
+        pageCounter++;
+        this.lastAccessTime = pageCounter;
+    }
+
     constructor(name) {
         this.name = name;
         this.creationTime = pageCounter;
@@ -131,7 +136,7 @@ export class Memory {
         
         this.pages.forEach((page) => {
             if (page?.name === processName) {
-                page.lastAccessTime = pageCounter;
+                page.access();
             }
         });
 
