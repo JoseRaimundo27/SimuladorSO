@@ -4,8 +4,9 @@ import TimelineBlock from "../../components/TimelineBlock/";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
 import { RiResetLeftFill } from "react-icons/ri";
+import { Memory } from "../../memory/memory";
 
-export default function Simulation({ algorithm, processData, quantum = 1, overhead = 1 }) {
+export default function Simulation({ algorithm, processData, quantum = 1, overhead = 1, pagination }) {
     const [simulationData, setSimulationData] = useState([]);
     const moment = useRef(0);
     const [majorTime, setMajorTime] = useState(0);
@@ -13,6 +14,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     const [finalTime, setFinalTime] = useState(0);
     const [speed, setSpeed] = useState(1);
     const [simulationState, setSimulationState] = useState('paused');
+    const memory = new Memory(pagination);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -44,7 +46,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             var activeProcesses = processData.filter(p => p.remainTime > 0);
             if (activeProcesses.length === 0) break;
 
-
             if (remainQuantum === quantum && remainOverhead === 0 || currentProcess?.remainTime === 0) {
                 activeProcesses = activeProcesses.filter(p => p.chegada <= time);
 
@@ -61,6 +62,12 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     currentProcess = activeProcesses.sort((p, q) => p.tempo - q.tempo)[0];
                 else if (algorithm === "edf") {
                     currentProcess = activeProcesses.sort((p, q) => p.deadline - q.deadline)[0];
+                }
+
+                if (currentProcess) {
+                    const pageFaults = memory.load(currentProcess.id, currentProcess.paginas);
+                    time += pageFaults;
+                    if (pageFaults) currentProcess.timeline.push(...Array(pageFaults).fill('wait'));
                 }
             }
 
@@ -83,6 +90,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     p.timeline.push('wait');
                 }
             });
+            memory.saveHistory();
             time++;
             if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
             if (remainQuantum < 0 && remainOverhead === 0 || currentProcess?.remainTime === 0) remainQuantum = quantum;
