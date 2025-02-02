@@ -77,7 +77,8 @@
 
 .memory-row {
   display: flex;
-  height: 3rem;
+  flex-flow: row wrap;
+  column-gap: 0;
 }
 
 .memory-page {

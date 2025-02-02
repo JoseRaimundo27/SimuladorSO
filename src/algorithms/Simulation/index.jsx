@@ -3,7 +3,7 @@ import TimelineBlock from "../../components/TimelineBlock/";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
 import { RiResetLeftFill } from "react-icons/ri";
-import { Memory, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory";
+import { Memory, MEMORY_CAPACITY, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory";
 
 import "../style.css";
 
@@ -19,6 +19,10 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
 
     const memory = useRef(new Memory(pagination));
     const currentMemory = memory.current.history[majorTime];
+
+    useEffect(() => {
+        memory.current = new Memory(pagination, processData.length * MEMORY_CAPACITY);
+    }, [processData.length])
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -54,7 +58,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         var maxLength = 0;
 
         memory.current.clearHistory();
-        
+
         while (true) {
             var activeProcesses = processData.filter(p => p.remainTime > 0);
             var idleProcesses = processData.filter(p => p.chegada > time);
@@ -87,7 +91,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     if (currentProcess && currentProcess.id !== lastCurrentProcess?.id) {
                         currentProcess.pageFaults = memory.current.load(currentProcess.id, currentProcess.paginas);
                     }
-                } 
+                }
                 else {
                     currentProcess = null;
                     memory.current.saveHistory();
@@ -121,17 +125,17 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
 
             maxLength = Math.max(maxLength, time);
             lastCurrentProcess = currentProcess;
-            
+
             if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
             if (remainQuantum < 0 && remainOverhead <= 0 || currentProcess?.remainTime <= 0) remainQuantum = quantum;
-            
+
             time++;
             if (!activeProcesses.length && !idleProcesses.length) break;
             if (time > 1000) break;
         }
 
         memory.current.saveHistory();
-        
+
         processData.forEach(p => {
             if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
         });
@@ -214,6 +218,14 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         setSimulationState("paused");
     }
 
+    const ramUsageText = currentMemory ? 
+        `(${currentMemory.pages.filter(p => p).length * PAGE_SIZE} KB / ${MEMORY_SIZE} KB)` 
+        : '';
+        
+    const diskUsageText = currentMemory ?
+        `(${currentMemory.disk.filter(p => p).length * PAGE_SIZE} KB / ${memory.current.diskLength * PAGE_SIZE} KB)`
+        : '';
+
     return (
         <>
             <h3>Simulação {algorithm.toUpperCase()}</h3>
@@ -274,7 +286,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             {currentMemory && <div className="memory-info">
                 <div className="memory-container">
                     <div className="memory-state">
-                        <div>Memória {`(${currentMemory.pages.filter(p => p).length * PAGE_SIZE} KB / ${MEMORY_SIZE} KB)`}</div>
+                        <div>Memória {`${ramUsageText}`}</div>
                         <div className="memory-row">
                             {currentMemory.pages.map((page, index) => (
                                 <div key={index} className={
@@ -287,13 +299,18 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                                 </div>
                             ))}
                         </div>
-                        {/* <div className="memory-row">
+                    </div>
+                    <div className="memory-state">
+                        <div>Disco {`${diskUsageText}`}</div>
+                        <div className="memory-row">
                             {currentMemory.disk.map((page, index) => (
-                                <div key={index} className={`memory-page ${page ? 'filled' : ''}`}>
-                                    {page?.name ?? "-"}
+                                <div key={index} className={
+                                    `memory-page ${page ? 'filled' : ''} 
+                                `}>
+                                    {page?.name ?? " "}
                                 </div>
                             ))}
-                        </div> */}
+                        </div>
                     </div>
                 </div>
             </div>}

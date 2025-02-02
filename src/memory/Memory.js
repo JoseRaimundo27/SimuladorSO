@@ -71,20 +71,30 @@ export class Memory {
      * @param {number} pageSize 
      * @param {'fifo'|'lru'} alogirthm 
      */
-    constructor(alogirthm = 'fifo') {
+    constructor(alogirthm = 'fifo', diskLength = MEMORY_CAPACITY) {
         this.algorithm = alogirthm;
-        this.pages = new Array(MEMORY_CAPACITY).fill(null);
-        this.disk = [];
+        this.diskLength = diskLength;
 
         this.load = this.load.bind(this);
         this.unload = this.unload.bind(this);
         this.saveHistory = this.saveHistory.bind(this);
     }
 
+    getRamUsageText() {
+        return `${this.pages.filter(p => p).length * PAGE_SIZE} KB / ${MEMORY_SIZE} KB`;
+    }
+
+    getDiskUsageText() {
+        return `${this.disk.filter(p => p).length * PAGE_SIZE} KB / ${this.diskLength * PAGE_SIZE} KB`;
+    }
+
     clearHistory() {
+        this.pages = new Array(MEMORY_CAPACITY).fill(null);
+        this.disk = new Array(this.diskLength).fill(null);
+
         this.history = [{
-            pages: new Array(MEMORY_CAPACITY).fill(null),
-            disk: []
+            pages: [...this.pages],
+            disk: [...this.disk]
         }]
     }
 
@@ -156,57 +166,39 @@ export class Memory {
 
             this.pages[pageIndex] = newPage;
 
-            if (this.disk.includes(newPage)) {
-                this.disk.splice(this.disk.indexOf(newPage), 1);
+            const diskIndex = this.disk.findIndex(p => p && p.name === processName);
+            if (diskIndex >= 0) {
+                this.disk[diskIndex] = null;
             }
         }
 
         return pageFaultCounter;
     }
 
-    #killPage(processName) {
-        switch (this.algorithm.toLowerCase()) {
-            case 'fifo':
-            default:
-                return this.#killPageFIFO(processName);
-            case 'lru':
-                return this.#killPageLRU(processName);
+    #moveToDisk(page) {
+        const index = this.disk.indexOf(null);
+        if (index >= 0) {
+            this.disk[index] = page;
+        } else {
+            this.disk.push(page);
         }
     }
 
-    #killPageFIFO(processName) {
+    #killPage(processName) {
         const oldestPage = this.pages.reduce((oldest, page) => {
             if (page == null || page.name === processName) return oldest;
+
+            if (this.alogirthm === 'lru') return page.lastAccessTime < oldest.lastAccessTime ? page : oldest;
             return page.creationTime < oldest.creationTime ? page : oldest;
         }, this.pages.find((page) => page?.name !== processName));
 
         const index = this.pages.indexOf(oldestPage);
         this.pages[index] = null;
 
-        if (!this.disk.includes(oldestPage)) {
-            this.disk.push(oldestPage);
-        }
+        this.#moveToDisk(oldestPage);
 
         this.#killed.push(oldestPage);
         console.log("KILL", oldestPage.name, index);
-
-        return index;
-    }
-
-    #killPageLRU(processName) {
-        const oldestPage = this.pages.reduce((oldest, page) => {
-            if (page == null || page.name === processName) return oldest;
-            return page.lastAccessTime < oldest.lastAccessTime ? page : oldest;
-        }, this.pages.find((page) => page?.name !== processName));
-
-        const index = this.pages.indexOf(oldestPage);
-        this.pages[index] = null;
-
-        if (!this.disk.includes(oldestPage)) {
-            this.disk.push(oldestPage);
-        }
-
-        this.#killed.push(oldestPage);
 
         return index;
     }
