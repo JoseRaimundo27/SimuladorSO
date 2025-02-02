@@ -70,6 +70,17 @@ export class Memory {
         this.algorithm = alogirthm;
         this.pages = new Array(MEMORY_CAPACITY).fill(null);
         this.disk = [];
+
+        this.load = this.load.bind(this);
+        this.unload = this.unload.bind(this);
+        this.saveHistory = this.saveHistory.bind(this);
+    }
+
+    clearHistory() {
+        this.history = [{
+            pages: new Array(MEMORY_CAPACITY).fill(null),
+            disk: []
+        }]
     }
 
     /**
@@ -82,13 +93,11 @@ export class Memory {
             pages: [...this.pages],
             disk: [...this.disk]
         };
-
-        this.history.push(incoming);
-
+        
         for (let i = 0; i < incoming.pages.length; i++) {
             const newPage = incoming?.pages[i];
             const oldPage = last?.pages[i];
-
+            
             if (newPage && newPage.name === processName) {
                 if (pageFault) {
                     incoming.pages[i] = newPage.markAsLoading();
@@ -101,6 +110,8 @@ export class Memory {
                 last.pages[i] = oldPage.markAsVictim();
             }
         }
+
+        this.history.push(incoming);
     }
 
     unload(proccessName) {
@@ -113,6 +124,43 @@ export class Memory {
 
     isLoaded(processName, numPages) {
         return this.pages.filter((page) => page?.name === processName).length >= numPages;
+    }
+
+    loadStep(processName, numPages) {
+        this.pages.forEach((page) => {
+            if (page?.name === processName) {
+                page.lastAccessTime = pageCounter;
+            }
+        });
+
+        const loadedPages = this.pages.filter((page) => page?.name === processName).length;
+
+        if (loadedPages >= numPages) {
+            this.saveHistory(processName);
+            return 0;
+        }
+
+        for (let i = 0; i < numPages - loadedPages; i++) {
+            let pageIndex = this.pages.findIndex((p) => p === null);
+
+            if (pageIndex < 0) {
+                this.saveHistory(processName, "page_fault");
+                pageIndex = this.#killPage();
+                this.pages[pageIndex] = newPage;
+                return 1;
+                // console.log("PAGE FAULT", processName, this.pages.map((p) => p?.name), pageFaultCounter);
+            }
+
+            const newPage = new Page(processName);
+
+            this.pages[pageIndex] = newPage;
+
+            if (this.disk.includes(newPage)) {
+                this.disk.splice(this.disk.indexOf(newPage), 1);
+            }
+        }
+
+        return 0;
     }
 
     load(processName, numPages) {
@@ -132,7 +180,7 @@ export class Memory {
             if (pageIndex < 0) {
                 this.saveHistory(processName, "page_fault");
                 pageFaultCounter++;
-                pageIndex = this.#killPage();
+                pageIndex = this.#killPage(processName);
                 // console.log("PAGE FAULT", processName, this.pages.map((p) => p?.name), pageFaultCounter);
             }
 
@@ -148,21 +196,21 @@ export class Memory {
         return pageFaultCounter;
     }
 
-    #killPage() {
+    #killPage(processName) {
         switch (this.algorithm.toLowerCase()) {
             case 'fifo':
             default:
-                return this.#killPageFIFO();
+                return this.#killPageFIFO(processName);
             case 'lru':
-                return this.#killPageLRU();
+                return this.#killPageLRU(processName);
         }
     }
 
-    #killPageFIFO() {
+    #killPageFIFO(processName) {
         const oldestPage = this.pages.reduce((oldest, page) => {
-            if (page == null) return oldest;
+            if (page == null || page.name === processName) return oldest;
             return page.creationTime < oldest.creationTime ? page : oldest;
-        }, this.pages[0]);
+        }, this.pages.find((page) => page?.name !== processName));
 
         const index = this.pages.indexOf(oldestPage);
         this.pages[index] = null;
@@ -172,15 +220,16 @@ export class Memory {
         }
 
         this.#killed.push(oldestPage);
+        console.log("KILL", oldestPage.name, index);
 
         return index;
     }
 
-    #killPageLRU() {
+    #killPageLRU(processName) {
         const oldestPage = this.pages.reduce((oldest, page) => {
-            if (page == null) return oldest;
+            if (page == null || page.name === processName) return oldest;
             return page.lastAccessTime < oldest.lastAccessTime ? page : oldest;
-        }, this.pages[0]);
+        }, this.pages.find((page) => page?.name !== processName));
 
         const index = this.pages.indexOf(oldestPage);
         this.pages[index] = null;

@@ -49,8 +49,11 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         });
         var remainQuantum = quantum;
         var currentProcess = null;
+        var lastCurrentProcess = null;
         var remainOverhead = 0;
         var maxLength = 0;
+
+        memory.current.clearHistory();
         
         while (true) {
             var activeProcesses = processData.filter(p => p.remainTime > 0);
@@ -80,9 +83,8 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     currentProcess = activeProcesses.sort((p, q) => p.deadline - q.deadline)[0];
                 }
 
-                if (currentProcess) {
+                if (currentProcess && currentProcess.id !== lastCurrentProcess?.id) {
                     currentProcess.pageFaults = memory.current.load(currentProcess.id, currentProcess.paginas);
-                    console.log(`Page fault: ${currentProcess.pageFaults}`);
                 }
             }
 
@@ -94,32 +96,37 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 } else if (p.id === currentProcess?.id) {
                     if (p.pageFaults > 0) {
                         p.timeline.push('loading');
-                        // p.pageFaults--;
+                        p.pageFaults--;
                     } else if (remainQuantum > 0) {
                         p.timeline.push('exe');
                         p.remainTime--;
                         remainOverhead = overhead;
+                        memory.current.saveHistory(p.id);
                     } else {
                         p.timeline.push('over');
                         p.marked = true;
                         remainOverhead--;
+                        memory.current.saveHistory(p.id);
                     }
                 } else {
                     p.timeline.push('wait');
                 }
             });
-            if (currentProcess && currentProcess.pageFaults <= 0) memory.current.saveHistory(currentProcess.id);
-            time++;
+
             maxLength = Math.max(maxLength, time);
+            lastCurrentProcess = currentProcess;
+            
             if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
             if (remainQuantum < 0 && remainOverhead <= 0 || currentProcess?.remainTime <= 0) remainQuantum = quantum;
+            
+            time++;
+            console.log("memory", memory.current.history.length, time);
         }
-
+        
         // processData.forEach(p => {
         //     if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
         // });
 
-        memory.current.saveHistory(currentProcess?.id);
         setSimulationData(processData);
         setFinalTime(time);
     }, [])
