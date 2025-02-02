@@ -126,43 +126,6 @@ export class Memory {
         return this.pages.filter((page) => page?.name === processName).length >= numPages;
     }
 
-    loadStep(processName, numPages) {
-        this.pages.forEach((page) => {
-            if (page?.name === processName) {
-                page.lastAccessTime = pageCounter;
-            }
-        });
-
-        const loadedPages = this.pages.filter((page) => page?.name === processName).length;
-
-        if (loadedPages >= numPages) {
-            this.saveHistory(processName);
-            return 0;
-        }
-
-        for (let i = 0; i < numPages - loadedPages; i++) {
-            let pageIndex = this.pages.findIndex((p) => p === null);
-
-            if (pageIndex < 0) {
-                this.saveHistory(processName, "page_fault");
-                pageIndex = this.#killPage();
-                this.pages[pageIndex] = newPage;
-                return 1;
-                // console.log("PAGE FAULT", processName, this.pages.map((p) => p?.name), pageFaultCounter);
-            }
-
-            const newPage = new Page(processName);
-
-            this.pages[pageIndex] = newPage;
-
-            if (this.disk.includes(newPage)) {
-                this.disk.splice(this.disk.indexOf(newPage), 1);
-            }
-        }
-
-        return 0;
-    }
-
     load(processName, numPages) {
         let pageFaultCounter = 0;
         
