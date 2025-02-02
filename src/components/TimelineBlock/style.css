@@ -3,6 +3,10 @@
   height: 3rem;
   background-color: lightgray;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
 }
 
 .timeline-block.invisible {
@@ -36,4 +40,9 @@
 .timeline-block.red {
   background-color: red;
   color: white;
+}
+
+div p{
+    font-weight: bold;
+  
 }

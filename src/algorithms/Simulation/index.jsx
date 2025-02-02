@@ -203,6 +203,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                             {p.timeline.map((state, index) => (
                                 <TimelineBlock key={index} state={state} index={index} majorTime={majorTime} minorTime={minorTime} />
                             ))}
+                            
                         </div>
                     </div>
                 ))}
