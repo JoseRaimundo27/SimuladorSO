@@ -45,6 +45,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             p.remainTime = p.tempo;
             p.timeline = [];
             p.marked = false;
+            p.pageFaults = 0;
         });
         var remainQuantum = quantum;
         var currentProcess = null;
@@ -74,9 +75,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 }
 
                 if (currentProcess) {
-                    const pageFaults = memory.current.load(currentProcess.id, currentProcess.paginas);
-                    time += pageFaults;
-                    currentProcess.timeline.push(...Array(pageFaults).fill('loading'));
+                    currentProcess.pageFaults += memory.current.load(currentProcess.id, currentProcess.paginas);
                 }
             }
 
@@ -86,7 +85,10 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 } else if (p.chegada > time) {
                     p.timeline.push('idle');
                 } else if (p.id === currentProcess?.id) {
-                    if (remainQuantum > 0) {
+                    if (p.pageFaults > 0) {
+                        p.timeline.push('loading');
+                        p.pageFaults--;
+                    } else if (remainQuantum > 0) {
                         p.timeline.push('exe');
                         p.remainTime--;
                         remainOverhead = overhead;
@@ -99,7 +101,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     p.timeline.push('wait');
                 }
             });
-            memory.current.saveHistory(currentProcess?.id);
+            if (currentProcess && currentProcess.pageFaults <= 0) memory.current.saveHistory(currentProcess.id);
             time++;
             maxLength = Math.max(maxLength, time);
             if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
