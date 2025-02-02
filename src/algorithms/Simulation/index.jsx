@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import TimelineBlock from "../../components/TimelineBlock/";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
-import { RiResetLeftFill, RiResetRightFill } from "react-icons/ri";
+import { RiResetLeftFill } from "react-icons/ri";
+import { AiFillThunderbolt } from "react-icons/ai";
 import { Memory, MEMORY_CAPACITY, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory";
 
 import "../style.css";
@@ -258,7 +259,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     <MdSkipNext size={32} />
                 </button>
                 <button className="simulation-controller-button" onClick={handleFinish}>
-                    <RiResetRightFill size={32} />
+                    <AiFillThunderbolt size={32} />
                 </button>
             </div>
             <div className="simulation-speed">
