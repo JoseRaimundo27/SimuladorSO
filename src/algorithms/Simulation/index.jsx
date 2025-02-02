@@ -120,7 +120,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             if (remainQuantum < 0 && remainOverhead <= 0 || currentProcess?.remainTime <= 0) remainQuantum = quantum;
             
             time++;
-            console.log("memory", memory.current.history.length, time);
         }
         
         // processData.forEach(p => {
@@ -234,7 +233,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             </div>
             <div className="simulation-speed">
                 <div>
-                    <input disabled={simulationState !== 'paused'} type="range" id="speed" name="speed" min="0.1" max="2" step="0.1" onChange={handleChangeSpeed} />
+                    <input disabled={simulationState !== 'paused'} type="range" id="speed" name="speed" min="0.1" max="4" step="0.1" value={speed} onChange={handleChangeSpeed} />
                     <label htmlFor="speed">Clock Speed: {parseFloat(speed).toFixed(1)}</label>
                 </div>
                 <span>
