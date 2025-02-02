@@ -43,7 +43,7 @@ const TimelineBlock = ({ state, index, majorTime, minorTime }) => {
   return (
     <div
       key={index}
-      className={`timeline-block ${getClassName(state)} ${index > majorTime ? "invisible" : ""} ${index === majorTime ? "progress" : ""}`}
+      className={`timeline-block ${getClassName(state)} ${index >= majorTime ? "invisible" : ""} ${index === majorTime ? "progress" : ""}`}
     >
       {index === majorTime && (<div className={`timeline-progress ${getClassName(state)}`} style={{ height: "100%", width: `${minorTime * 100}%` }}></div>)}
       <p >

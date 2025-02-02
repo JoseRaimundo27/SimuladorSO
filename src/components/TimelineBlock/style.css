@@ -20,6 +20,7 @@ div p{
 
 .timeline-block.invisible {
   background-color: white !important;
+  color: white !important;
 }
 .timeline-block.invisible p {
   display: none;
