@@ -63,10 +63,10 @@ export class Memory {
     }
 
     /**
-     * @param {any} proccessName 
+     * @param {any} processName 
      * @param {"page_fault"|undefined} pageFault 
      */
-    saveHistory(proccessName = null, pageFault) {
+    saveHistory(processName = null, pageFault) {
         const last = this.history[this.history.length - 1];
         const incoming = {
             pages: [...this.pages],
@@ -79,7 +79,7 @@ export class Memory {
             const newPage = incoming?.pages[i];
             const oldPage = last?.pages[i];
 
-            if (newPage && newPage.name === proccessName) {
+            if (newPage && newPage.name === processName) {
                 if (pageFault) {
                     incoming.pages[i] = newPage.markAsLoading();
                 } else {
@@ -93,11 +93,11 @@ export class Memory {
         }
     }
 
-    load(proccessName, numPages) {
+    load(processName, numPages) {
         let pageFaultCounter = 0;
 
         this.pages.forEach((page) => {
-            if (page?.name === proccessName) {
+            if (page?.name === processName) {
                 page.lastAccessTime = pageCounter;
             }
         });
@@ -106,12 +106,12 @@ export class Memory {
             let pageIndex = this.pages.findIndex((p) => p === null);
 
             if (pageIndex < 0) {
-                this.saveHistory(proccessName, "page_fault");
+                this.saveHistory(processName, "page_fault");
                 pageFaultCounter++;
                 pageIndex = this.#killPage();
             }
 
-            const newPage = new Page(proccessName);
+            const newPage = new Page(processName);
 
             this.pages[pageIndex] = newPage;
 
