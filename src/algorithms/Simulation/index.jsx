@@ -3,7 +3,7 @@ import TimelineBlock from "../../components/TimelineBlock/";
 import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
 import { RiResetLeftFill } from "react-icons/ri";
-import { Memory } from "../../memory/memory";
+import { Memory, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory";
 
 import "../style.css";
 
@@ -251,7 +251,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             {currentMemory && <div className="memory-info">
                 <div className="memory-container">
                     <div className="memory-state">
-                        <div>Memória</div>
+                        <div>Memória {`(${currentMemory.pages.filter(p => p).length * PAGE_SIZE} KB / ${MEMORY_SIZE} KB)`}</div>
                         <div className="memory-row">
                             {currentMemory.pages.map((page, index) => (
                                 <div key={index} className={
