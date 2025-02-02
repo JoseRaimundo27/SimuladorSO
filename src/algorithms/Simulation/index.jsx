@@ -56,7 +56,11 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             var activeProcesses = processData.filter(p => p.remainTime > 0);
             if (activeProcesses.length === 0) break;
 
-            if (remainQuantum === quantum && remainOverhead === 0 || currentProcess?.remainTime === 0) {
+            if (currentProcess?.remainTime <= 0) {
+                memory.current.unload(currentProcess.id);
+            }
+
+            if (remainQuantum === quantum && remainOverhead <= 0 || currentProcess?.remainTime <= 0) {
                 activeProcesses = activeProcesses.filter(p => p.chegada <= time);
 
                 if (algorithm === "round_robin") {
@@ -66,16 +70,19 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     activeProcesses = activeProcesses.filter(p => !p.marked)
                 }
 
-                if (algorithm === "fifo" || algorithm === "round_robin")
+                if (algorithm === "fifo" || algorithm === "round_robin") {
                     currentProcess = activeProcesses.sort((p, q) => p.chegada - q.chegada)[0];
-                else if (algorithm === "sjf")
+                }
+                else if (algorithm === "sjf") {
                     currentProcess = activeProcesses.sort((p, q) => p.tempo - q.tempo)[0];
+                }
                 else if (algorithm === "edf") {
                     currentProcess = activeProcesses.sort((p, q) => p.deadline - q.deadline)[0];
                 }
 
                 if (currentProcess) {
-                    currentProcess.pageFaults += memory.current.load(currentProcess.id, currentProcess.paginas);
+                    currentProcess.pageFaults = memory.current.load(currentProcess.id, currentProcess.paginas);
+                    console.log(`Page fault: ${currentProcess.pageFaults}`);
                 }
             }
 
@@ -87,7 +94,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 } else if (p.id === currentProcess?.id) {
                     if (p.pageFaults > 0) {
                         p.timeline.push('loading');
-                        p.pageFaults--;
+                        // p.pageFaults--;
                     } else if (remainQuantum > 0) {
                         p.timeline.push('exe');
                         p.remainTime--;
@@ -105,12 +112,12 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             time++;
             maxLength = Math.max(maxLength, time);
             if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
-            if (remainQuantum < 0 && remainOverhead === 0 || currentProcess?.remainTime === 0) remainQuantum = quantum;
+            if (remainQuantum < 0 && remainOverhead <= 0 || currentProcess?.remainTime <= 0) remainQuantum = quantum;
         }
 
-        processData.forEach(p => {
-            if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
-        });
+        // processData.forEach(p => {
+        //     if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
+        // });
 
         memory.current.saveHistory(currentProcess?.id);
         setSimulationData(processData);
