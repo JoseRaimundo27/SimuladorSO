@@ -13,7 +13,16 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     const [finalTime, setFinalTime] = useState(0);
     const [speed, setSpeed] = useState(1);
     const [simulationState, setSimulationState] = useState('paused');
+    const [memory, setMemory] = useState(null);
+    const [currentMemory, setCurrentMemory] = useState(null);
 
+<<<<<<< Updated upstream
+=======
+    useEffect(() => {
+        setCurrentMemory({ pages: memory?.getMemoryState(majorTime), size: memory?.getMemoryUse(majorTime) });
+    }, [majorTime])
+
+>>>>>>> Stashed changes
     useEffect(() => {
         const interval = setInterval(() => {
             if (finalTime === majorTime)
@@ -36,14 +45,30 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             p.remainTime = p.tempo;
             p.timeline = [];
             p.marked = false;
+<<<<<<< Updated upstream
+=======
+            p.fault = false;
+>>>>>>> Stashed changes
         });
         var remainQuantum = quantum;
         var currentProcess = null;
         var remainOverhead = 0;
+<<<<<<< Updated upstream
+=======
+
+        var mem = new Memory(pagination);
+
+>>>>>>> Stashed changes
         while (true) {
             var activeProcesses = processData.filter(p => p.remainTime > 0);
             if (activeProcesses.length === 0) break;
 
+<<<<<<< Updated upstream
+=======
+            if (currentProcess?.remainTime <= 0) {
+                mem.free(currentProcess, time);
+            }
+>>>>>>> Stashed changes
 
             if (remainQuantum === quantum && remainOverhead === 0 || currentProcess?.remainTime === 0) {
                 activeProcesses = activeProcesses.filter(p => p.chegada <= time);
@@ -62,6 +87,15 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 else if (algorithm === "edf") {
                     currentProcess = activeProcesses.sort((p, q) => p.deadline - q.deadline)[0];
                 }
+<<<<<<< Updated upstream
+=======
+
+
+            }
+
+            if (currentProcess) {
+                currentProcess.fault = mem.setMemory(currentProcess, time);
+>>>>>>> Stashed changes
             }
 
             processData.forEach(p => {
@@ -70,7 +104,13 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 } else if (p.chegada > time) {
                     p.timeline.push('idle');
                 } else if (p.id === currentProcess?.id) {
+<<<<<<< Updated upstream
                     if (remainQuantum > 0) {
+=======
+                    if (p.fault) {
+                        p.timeline.push('loading');
+                    } else if (remainQuantum > 0) {
+>>>>>>> Stashed changes
                         p.timeline.push('exe');
                         p.remainTime--;
                         remainOverhead = overhead;
@@ -83,12 +123,30 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                     p.timeline.push('wait');
                 }
             });
+<<<<<<< Updated upstream
             time++;
             if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
             if (remainQuantum < 0 && remainOverhead === 0 || currentProcess?.remainTime === 0) remainQuantum = quantum;
         }
+=======
+
+            time++;
+            if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
+            if (remainQuantum < 0 && remainOverhead <= 0 || currentProcess?.remainTime <= 0) remainQuantum = quantum;
+
+            if (time > 300) {
+                console.error("Loop");
+                break;
+            }
+        }
+        mem.free(currentProcess, time);
+
+>>>>>>> Stashed changes
         setSimulationData(processData);
         setFinalTime(time);
+        setMemory(mem);
+        setCurrentMemory({ pages: mem.getMemoryState(0), size: mem.getMemoryUse(0) });
+
     }, [])
 
     function getAVGTurnaround(time) {
@@ -96,7 +154,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
 
         simulationData.map(p => {
             for (var i = 0; i < time && i < p.timeline.length; i++) {
-                if (['wait', 'over', 'exe'].includes(p.timeline[i]))
+                if (['wait', 'over', 'exe', 'loading'].includes(p.timeline[i]))
                     turnaround++;
             }
         });
@@ -211,6 +269,35 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             <div className="turnaround-info">
                 <h4>Turnaround Médio: {getAVGTurnaround(majorTime).toFixed(2)}</h4>
             </div>
+<<<<<<< Updated upstream
+=======
+            {currentMemory && <div className="memory-info">
+                <div className="memory-container">
+                    <div className="memory-state">
+                        <div>Memória {`(${currentMemory.size * PAGE_SIZE} KB / ${MEMORY_SIZE} KB)`}</div>
+                        <div className="memory-row">
+                            {currentMemory.pages?.map((page, index) => (
+                                <div key={index} className={
+                                    `memory-page ${page ? 'filled' : ''} 
+                                    ${page?.using ? 'using' : ''} 
+                                    ${page?.loading ? 'loading' : ''}
+                                    ${page?.victim ? 'victim' : ''}
+                                `}>
+                                    {page ?? " "}
+                                </div>
+                            ))}
+                        </div>
+                        {/* <div className="memory-row">
+                            {currentMemory.disk.map((page, index) => (
+                                <div key={index} className={`memory-page ${page ? 'filled' : ''}`}>
+                                    {page?.name ?? "-"}
+                                </div>
+                            ))}
+                        </div> */}
+                    </div>
+                </div>
+            </div>}
+>>>>>>> Stashed changes
         </>
     );
 }
