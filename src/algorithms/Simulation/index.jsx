@@ -4,7 +4,7 @@ import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
 import { RiResetLeftFill } from "react-icons/ri";
 import { AiFillThunderbolt } from "react-icons/ai";
-import { Memory, MEMORY_CAPACITY, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory";
+import { Memory, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory";
 
 import "../style.css";
 
@@ -18,11 +18,12 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     const [speed, setSpeed] = useState(1);
     const [simulationState, setSimulationState] = useState('paused');
 
-    const memory = useRef(new Memory(pagination));
+    const diskLength = processData.reduce((sum, p) => sum + p.paginas, 0);
+    const memory = useRef(new Memory(pagination, diskLength));
     const currentMemory = memory.current.history[majorTime];
 
     useEffect(() => {
-        memory.current = new Memory(pagination, processData.length * MEMORY_CAPACITY);
+        memory.current = new Memory(pagination, diskLength);
     }, [processData.length])
 
     useEffect(() => {
