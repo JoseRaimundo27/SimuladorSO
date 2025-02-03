@@ -24,8 +24,8 @@ export class Page {
     }
 
     access() {
-        pageCounter++;
         this.lastAccessTime = pageCounter;
+        pageCounter++;
     }
 
     constructor(name) {
