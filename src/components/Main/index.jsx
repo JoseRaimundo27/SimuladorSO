@@ -147,7 +147,7 @@ function Main() {
               min="0"
               value={quantum}
               onChange={(e) => setQuantum(Number(e.target.value))}
-              disabled={algorithm !== "round_robin"}
+              disabled={algorithm !== "round_robin" && algorithm !== "edf"}
             />
           </label>
           <label>

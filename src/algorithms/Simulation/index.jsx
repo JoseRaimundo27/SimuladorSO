@@ -4,7 +4,7 @@ import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
 import { RiResetLeftFill } from "react-icons/ri";
 import { AiFillThunderbolt } from "react-icons/ai";
-import { Memory, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory";
+import { Memory, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory.js";
 
 import "../style.css";
 
@@ -52,6 +52,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             p.timeline = [];
             p.marked = false;
             p.pageFaults = 0;
+            p.waitTime = 0
         });
         var remainQuantum = quantum;
         var currentProcess = null;
@@ -77,12 +78,19 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                         if (activeProcesses.filter(p => !p.marked).length === 0) {
                             activeProcesses.map(p => p.marked = false);
                         }
-                        activeProcesses = activeProcesses.filter(p => !p.marked)
+                
                     }
 
-                    if (algorithm === "fifo" || algorithm === "round_robin") {
+                    if (algorithm === "fifo" ) {
                         currentProcess = activeProcesses.sort((p, q) => p.chegada - q.chegada)[0];
                     }
+
+                    else if(algorithm === "round_robin"){
+                        // Ordena pelo maior tempo de espera (prioriza quem esperou mais tempo)
+                        currentProcess = activeProcesses.sort((p, q) => q.waitTime - p.waitTime)[0];
+                    
+                    }
+                
                     else if (algorithm === "sjf") {
                         currentProcess = activeProcesses.sort((p, q) => p.tempo - q.tempo)[0];
                     }
@@ -114,14 +122,18 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                         p.remainTime--;
                         remainOverhead = overhead;
                         memory.current.saveHistory(p.id);
+                        p.waitTime = 0;
+                        
                     } else {
                         p.timeline.push('over');
                         p.marked = true;
                         remainOverhead--;
                         memory.current.saveHistory(p.id);
+                    
                     }
                 } else {
                     p.timeline.push('wait');
+                    p.waitTime++;
                 }
             });
 
