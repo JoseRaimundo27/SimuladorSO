@@ -74,13 +74,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 activeProcesses = activeProcesses.filter(p => p.chegada <= time);
 
                 if (activeProcesses.length) {
-                    if (algorithm === "round_robin") {
-                        if (activeProcesses.filter(p => !p.marked).length === 0) {
-                            activeProcesses.map(p => p.marked = false);
-                        }
-                
-                    }
-
                     if (algorithm === "fifo" ) {
                         currentProcess = activeProcesses.sort((p, q) => p.chegada - q.chegada)[0];
                     }
