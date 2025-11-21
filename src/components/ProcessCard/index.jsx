@@ -26,13 +26,13 @@ function ProcessCard({ process, index, onChange, algorithm, disabled }) {
           />
         </label>
         <label className={`process-config-label ${disablePages ? "disabled" : ""}`}>
-          Páginas:
+          Periodo:
           <input
             type="number"
             min="1"
             max="10"
-            value={process.paginas}
-            onChange={(e) => onChange(index, "paginas", e.target.value)}
+            value={process.periodo}
+            onChange={(e) => onChange(index, "periodo", e.target.value)}
             disabled={disabled}
           />
         </label>

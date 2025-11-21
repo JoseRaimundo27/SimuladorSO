@@ -7,8 +7,9 @@ import "./style.css";
 
 function Main() {
   const [numProcesses, setNumProcesses] = useState(1);
-  const [algorithm, setAlgorithm] = useState("fifo");
+  const [algorithm, setAlgorithm] = useState("rm");
   const [quantum, setQuantum] = useState(1);
+  const [periodo, setPeriodo] = useState(1);
   const [overhead, setOverhead] = useState(1);
   const [processData, setProcessData] = useState([]);
   const [isSimulationRunning, setIsSimulationRunning] = useState(false); // Estado para controle de execução
@@ -19,6 +20,9 @@ function Main() {
     fillProcesses(numProcesses);
   }, [numProcesses]);
 
+  useEffect(() => {
+  console.log('Process Data:', processData);
+}, [processData]);
   const handleNumProcessesChange = (n) => {
     const newNum = Math.max(1, Number(n));
     setNumProcesses(newNum);
@@ -30,6 +34,7 @@ function Main() {
       const newProcesses = Array.from({ length: offset }, (_, index) => ({
         id: processData.length + index + 1,
         tempo: 1,
+        periodo: 1,
         deadline: 0,
         chegada: 0,
       }));
@@ -90,9 +95,10 @@ function Main() {
   };
 
   const handleSimulationReset = () => {
-    setAlgorithm("fifo");
+    setAlgorithm("rm");
     setQuantum(1);
     setOverhead(1);
+    setPeriodo(1);
     setProcessData([]);
     setNumProcesses(1);
     setIsSimulationRunning(false); // Simulação não está mais em execução
@@ -128,7 +134,7 @@ function Main() {
               onChange={(e) => setAlgorithm(e.target.value)}
             >
 
-              <option value="fifo">FIFO</option>
+              <option value="rm">Rate Monotonic</option>
               <option value="sjf">SJF</option>
               <option value="edf">EDF</option>
               <option value="round_robin">Round Robin</option>
@@ -167,7 +173,9 @@ function Main() {
                 algorithm={algorithm}
                 disabled={isSimulationRunning}
               />
-            ))}
+            ))
+
+            }
           </div>
         </div>
 
@@ -197,7 +205,7 @@ function Main() {
         </div>
         {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
         {isSimulationRunning && (
-          <Simulation {...{algorithm, processData, quantum, overhead}} />
+          <Simulation {...{algorithm, processData, quantum,periodo, overhead}} />
         )}
 
       </dialog>

@@ -7,7 +7,7 @@ import { AiFillThunderbolt } from "react-icons/ai";
 
 import "../style.css";
 
-export default function Simulation({ algorithm, processData, quantum = 1, overhead = 1 }) {
+export default function Simulation({ algorithm, processData, quantum = 1, periodo = 1,  overhead = 1 }) {
     const [simulationData, setSimulationData] = useState([]);
     const moment = useRef(0);
     const lastTick = useRef(Date.now());
@@ -61,8 +61,9 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 activeProcesses = activeProcesses.filter(p => p.chegada <= time);
 
                 if (activeProcesses.length) {
-                    if (algorithm === "fifo" ) {
+                    if (algorithm === "rm" ) {
                         currentProcess = activeProcesses.sort((p, q) => p.chegada - q.chegada)[0];
+                        console.log("aqui")
                     }
 
                     else if(algorithm === "round_robin"){
