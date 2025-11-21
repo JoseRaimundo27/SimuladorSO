@@ -17,7 +17,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     const [speed, setSpeed] = useState(1);
     const [simulationState, setSimulationState] = useState('paused');
 
-    const diskLength = processData.reduce((sum, p) => sum + p.paginas, 0);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -44,7 +43,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             p.remainTime = p.tempo;
             p.timeline = [];
             p.marked = false;
-            p.pageFaults = 0;
             p.waitTime = 0
         });
         var remainQuantum = quantum;
@@ -93,10 +91,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 } else if (p.chegada > time) {
                     p.timeline.push('idle');
                 } else if (p.id === currentProcess?.id) {
-                    if (p.pageFaults > 0) {
-                        p.timeline.push('loading');
-                        p.pageFaults--;
-                    } else if (remainQuantum > 0) {
+                    if (remainQuantum > 0) {
                         p.timeline.push('exe');
                         p.remainTime--;
                         remainOverhead = overhead;
@@ -159,8 +154,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                 return "Em Execução";
             case 'wait':
                 return "Em Espera";
-            case 'loading':
-                return "Falha de página";
             case 'over':
                 return "Sobrecarga";
             case 'idle':

@@ -30,7 +30,6 @@ function Main() {
       const newProcesses = Array.from({ length: offset }, (_, index) => ({
         id: processData.length + index + 1,
         tempo: 1,
-        paginas: 1,
         deadline: 0,
         chegada: 0,
       }));
