@@ -1,6 +1,6 @@
 // ProcessCard.js
 import React from "react";
-import { MEMORY_CAPACITY } from "../../memory/memory";
+
 
 import "./style.css";
 

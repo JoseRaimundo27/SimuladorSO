@@ -10,7 +10,6 @@ function Main() {
   const [algorithm, setAlgorithm] = useState("fifo");
   const [quantum, setQuantum] = useState(1);
   const [overhead, setOverhead] = useState(1);
-  const [pagination, setPagination] = useState("fifo");
   const [processData, setProcessData] = useState([]);
   const [isSimulationRunning, setIsSimulationRunning] = useState(false); // Estado para controle de execução
   const SimDialog = useRef(null);
@@ -47,7 +46,6 @@ function Main() {
       algorithm: algorithm,
       quantum: quantum,
       overhead: overhead,
-      pagination: pagination,
       processData: processData
     }
 
@@ -75,8 +73,6 @@ function Main() {
         setQuantum(obj.quantum)
       if (obj.overhead)
         setOverhead(obj.overhead)
-      if (obj.pagination)
-        setPagination(obj.pagination)
       if (obj.processData)
         setProcessData(obj.processData)
     };
@@ -98,7 +94,6 @@ function Main() {
     setAlgorithm("fifo");
     setQuantum(1);
     setOverhead(1);
-    setPagination("fifo");
     setProcessData([]);
     setNumProcesses(1);
     setIsSimulationRunning(false); // Simulação não está mais em execução
@@ -159,16 +154,6 @@ function Main() {
               onChange={(e) => setOverhead(Number(e.target.value))}
             />
           </label>
-          <label>
-            Paginação:
-            <select
-              value={pagination}
-              onChange={(e) => setPagination(e.target.value)}
-            >
-              <option value="fifo">FIFO</option>
-              <option value="lru">LRU</option>
-            </select>
-          </label>
         </div>
 
         <div className="process-config">
@@ -213,7 +198,7 @@ function Main() {
         </div>
         {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
         {isSimulationRunning && (
-          <Simulation {...{algorithm, processData, quantum, overhead, pagination}} />
+          <Simulation {...{algorithm, processData, quantum, overhead}} />
         )}
 
       </dialog>

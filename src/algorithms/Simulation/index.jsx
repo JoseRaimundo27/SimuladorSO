@@ -4,11 +4,10 @@ import { IoMdPlay, IoMdPause } from "react-icons/io";
 import { MdSkipPrevious, MdSkipNext } from "react-icons/md";
 import { RiResetLeftFill } from "react-icons/ri";
 import { AiFillThunderbolt } from "react-icons/ai";
-import { Memory, MEMORY_SIZE, PAGE_SIZE } from "../../memory/memory.js";
 
 import "../style.css";
 
-export default function Simulation({ algorithm, processData, quantum = 1, overhead = 1, pagination }) {
+export default function Simulation({ algorithm, processData, quantum = 1, overhead = 1 }) {
     const [simulationData, setSimulationData] = useState([]);
     const moment = useRef(0);
     const lastTick = useRef(Date.now());
@@ -19,12 +18,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
     const [simulationState, setSimulationState] = useState('paused');
 
     const diskLength = processData.reduce((sum, p) => sum + p.paginas, 0);
-    const memory = useRef(new Memory(pagination, diskLength));
-    const currentMemory = memory.current.history[majorTime];
-
-    useEffect(() => {
-        memory.current = new Memory(pagination, diskLength);
-    }, [processData.length])
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -60,16 +53,12 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         var remainOverhead = 0;
         var maxLength = 0;
 
-        memory.current.clearHistory();
 
         while (true) {
             var activeProcesses = processData.filter(p => p.remainTime > 0);
             var idleProcesses = processData.filter(p => p.chegada > time);
 
-            if (currentProcess?.remainTime <= 0) {
-                memory.current.unload(currentProcess.id);
-            }
-
+        
             if (remainQuantum === quantum && remainOverhead <= 0 || !currentProcess?.remainTime) {
                 activeProcesses = activeProcesses.filter(p => p.chegada <= time);
 
@@ -91,13 +80,10 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                         currentProcess = activeProcesses.sort((p, q) => p.deadline - q.deadline)[0];
                     }
 
-                    if (currentProcess && currentProcess.id !== lastCurrentProcess?.id) {
-                        currentProcess.pageFaults = memory.current.load(currentProcess.id, currentProcess.paginas);
-                    }
+        
                 }
                 else {
                     currentProcess = null;
-                    memory.current.saveHistory();
                 }
             }
 
@@ -114,14 +100,12 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
                         p.timeline.push('exe');
                         p.remainTime--;
                         remainOverhead = overhead;
-                        memory.current.saveHistory(p.id);
                         p.waitTime = 0;
                         
                     } else {
                         p.timeline.push('over');
                         p.marked = true;
                         remainOverhead--;
-                        memory.current.saveHistory(p.id);
                     
                     }
                 } else {
@@ -141,7 +125,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             if (time > 1000) break;
         }
 
-        memory.current.saveHistory();
 
         processData.forEach(p => {
             if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
@@ -230,13 +213,6 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
         setSimulationState("paused");
     }
 
-    const ramUsageText = currentMemory ? 
-        `(${currentMemory.pages.filter(p => p).length * PAGE_SIZE} KB / ${MEMORY_SIZE} KB)` 
-        : '';
-
-    const diskUsageText = currentMemory ?
-        `(${currentMemory.disk.filter(p => p).length * PAGE_SIZE} KB / ${memory.current.diskLength * PAGE_SIZE} KB)`
-        : '';
 
     return (
         <>
@@ -298,37 +274,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, overhe
             <div className="turnaround-info">
                 <h4>Turnaround Médio: {getAVGTurnaround(majorTime).toFixed(2)}</h4>
             </div>
-            {currentMemory && <div className="memory-info">
-                <div className="memory-container">
-                    <div className="memory-state">
-                        <div>Memória {`${ramUsageText}`}</div>
-                        <div className="memory-row">
-                            {currentMemory.pages.map((page, index) => (
-                                <div key={index} className={
-                                    `memory-page ${page ? 'filled' : ''} 
-                                    ${page?.using ? 'using' : ''} 
-                                    ${page?.loading ? 'loading' : ''}
-                                    ${page?.victim ? 'victim' : ''}
-                                `}>
-                                    {page?.name ?? " "}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="memory-state">
-                        <div>Disco {`${diskUsageText}`}</div>
-                        <div className="memory-row">
-                            {currentMemory.disk.map((page, index) => (
-                                <div key={index} className={
-                                    `memory-page ${page ? 'filled' : ''} 
-                                `}>
-                                    {page?.name ?? " "}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>}
+           
         </>
     );
 }
