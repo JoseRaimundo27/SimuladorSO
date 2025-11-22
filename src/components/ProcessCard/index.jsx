@@ -29,10 +29,10 @@ function ProcessCard({ process, index, onChange, algorithm, disabled }) {
           Periodo:
           <input
             type="number"
-            min="1"
+            min={process.tempo}
             max="10"
             value={process.periodo}
-            onChange={(e) => onChange(index, "periodo", e.target.value)}
+            onChange={(e) => onChange(index, "periodo", Math.max(process.tempo, Number(e.target.value)))}
             disabled={disabled}
           />
         </label>

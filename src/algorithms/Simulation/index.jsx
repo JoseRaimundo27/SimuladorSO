@@ -62,8 +62,7 @@ export default function Simulation({ algorithm, processData, quantum = 1, period
 
                 if (activeProcesses.length) {
                     if (algorithm === "rm" ) {
-                        currentProcess = activeProcesses.sort((p, q) => p.chegada - q.chegada)[0];
-                        console.log("aqui")
+                        currentProcess = activeProcesses.sort((p, q) => p.periodo - q.periodo)[0];
                     }
 
                     else if(algorithm === "round_robin"){

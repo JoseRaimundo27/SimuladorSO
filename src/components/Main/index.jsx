@@ -133,7 +133,6 @@ function Main() {
               value={algorithm}
               onChange={(e) => setAlgorithm(e.target.value)}
             >
-
               <option value="rm">Rate Monotonic</option>
               <option value="sjf">SJF</option>
               <option value="edf">EDF</option>
