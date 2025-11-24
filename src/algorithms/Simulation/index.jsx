@@ -37,97 +37,72 @@ export default function Simulation({ algorithm, processData, quantum = 1, period
         return () => clearInterval(interval);
     }, [finalTime, majorTime, simulationState, speed])
 
-    useEffect(() => {
-        var time = 0;
+useEffect(() => {
+    let time = 0;
+
+    // Inicializar processos
+    processData.forEach(p => {
+        p.timeline = [];
+        p.nextRelease = p.chegada;
+        p.nextDeadline = p.chegada + p.periodo;
+        p.remain = 0; // job começa apenas na chegada
+    });
+
+    while (time < 500) {
+
+        // 1) Liberar novos jobs
         processData.forEach(p => {
-            p.remainTime = p.tempo;
-            p.timeline = [];
-            p.marked = false;
-            p.waitTime = 0
-        });
-        var remainQuantum = quantum;
-        var currentProcess = null;
-        var lastCurrentProcess = null;
-        var remainOverhead = 0;
-        var maxLength = 0;
-
-
-        while (true) {
-            var activeProcesses = processData.filter(p => p.remainTime > 0);
-            var idleProcesses = processData.filter(p => p.chegada > time);
-
-        
-            if (remainQuantum === quantum && remainOverhead <= 0 || !currentProcess?.remainTime) {
-                activeProcesses = activeProcesses.filter(p => p.chegada <= time);
-
-                if (activeProcesses.length) {
-                    if (algorithm === "rm" ) {
-                        currentProcess = activeProcesses.sort((p, q) => p.periodo - q.periodo)[0];
-                    }
-
-                    else if(algorithm === "round_robin"){
-                        // Ordena pelo maior tempo de espera (prioriza quem esperou mais tempo)
-                        currentProcess = activeProcesses.sort((p, q) => q.waitTime - p.waitTime)[0];
-                    
-                    }
-                
-                    else if (algorithm === "sjf") {
-                        currentProcess = activeProcesses.sort((p, q) => p.tempo - q.tempo)[0];
-                    }
-                    else if (algorithm === "edf") {
-                        currentProcess = activeProcesses.sort((p, q) => p.deadline - q.deadline)[0];
-                    }
-
-        
-                }
-                else {
-                    currentProcess = null;
-                }
+            if (time === p.nextRelease) {
+                p.remain = p.tempo;                 // novo job
+                p.nextRelease += p.periodo;         // próxima liberação
+                p.nextDeadline += p.periodo;        // próxima deadline
             }
+        });
 
-            processData.forEach(p => {
-                if (p.remainTime == 0) {
-                    p.timeline.push('end');
-                } else if (p.chegada > time) {
-                    p.timeline.push('idle');
-                } else if (p.id === currentProcess?.id) {
-                    if (remainQuantum > 0) {
-                        p.timeline.push('exe');
-                        p.remainTime--;
-                        remainOverhead = overhead;
-                        p.waitTime = 0;
-                        
-                    } else {
-                        p.timeline.push('over');
-                        p.marked = true;
-                        remainOverhead--;
-                    
-                    }
-                } else {
-                    p.timeline.push('wait');
-                    p.waitTime++;
-                }
-            });
 
-            maxLength = Math.max(maxLength, time);
-            lastCurrentProcess = currentProcess;
+        // 2) Verificar deadlines perdidos
+        processData.forEach(p => {
+            if (time === p.nextDeadline && p.remain > 0) {
+                p.timeline.push("over");
+                p.remain = 0; // descarta job perdido
+            }
+        });
 
-            if (algorithm === "edf" || algorithm === "round_robin") remainQuantum--;
-            if (remainQuantum < 0 && remainOverhead <= 0 || currentProcess?.remainTime <= 0) remainQuantum = quantum;
 
-            time++;
-            if (!activeProcesses.length && !idleProcesses.length) break;
-            if (time > 1000) break;
+        // 3) Escolher processo pelo RM (menor período > maior prioridade)
+        const ready = processData.filter(p => p.remain > 0 && time >= p.chegada);
+
+        let current = null;
+        if (ready.length > 0) {
+            current = ready.sort((a, b) => a.periodo - b.periodo)[0];
         }
 
 
+        // 4) Preencher timeline de todos os processos
         processData.forEach(p => {
-            if (maxLength > p.timeline.length) p.timeline.push(...Array(maxLength - p.timeline.length).fill('end'));
+            if (p.remain === 0 && time < p.nextRelease) {
+                p.timeline.push("idle");
+            } 
+            else if (current && p.id === current.id) {
+                p.timeline.push("exe");
+                p.remain--;
+            }
+            else if (p.remain > 0) {
+                p.timeline.push("wait");
+            }
+            else {
+                p.timeline.push("idle");
+            }
         });
 
-        setSimulationData(processData);
-        setFinalTime(time);
-    }, [])
+        time++;
+    }
+
+    setSimulationData(processData);
+    setFinalTime(time);
+
+}, []);
+
 
     function getAVGTurnaround(time) {
         var turnaround = 0;
