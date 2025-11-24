@@ -59,16 +59,6 @@ useEffect(() => {
             }
         });
 
-
-        // 2) Verificar deadlines perdidos
-        processData.forEach(p => {
-            if (time === p.nextDeadline && p.remain > 0) {
-                p.timeline.push("over");
-                p.remain = 0; // descarta job perdido
-            }
-        });
-
-
         // 3) Escolher processo pelo RM (menor período > maior prioridade)
         const ready = processData.filter(p => p.remain > 0 && time >= p.chegada);
 
@@ -77,18 +67,24 @@ useEffect(() => {
             current = ready.sort((a, b) => a.periodo - b.periodo)[0];
         }
 
-
         // 4) Preencher timeline de todos os processos
         processData.forEach(p => {
-            if (p.remain === 0 && time < p.nextRelease) {
+            if (p.chegada > time) {
                 p.timeline.push("idle");
+            }
+            else if (p.remain === 0 && time < p.nextRelease) {
+                p.timeline.push("end");
             } 
             else if (current && p.id === current.id) {
                 p.timeline.push("exe");
                 p.remain--;
             }
             else if (p.remain > 0) {
-                p.timeline.push("wait");
+                if (time + p.remain >= (p.nextDeadline  - p.periodo)) {
+                    p.timeline.push("over");
+                }else {
+                    p.timeline.push("wait");
+                }
             }
             else {
                 p.timeline.push("idle");
