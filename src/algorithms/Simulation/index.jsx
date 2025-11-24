@@ -7,7 +7,7 @@ import { AiFillThunderbolt } from "react-icons/ai";
 
 import "../style.css";
 
-export default function Simulation({ algorithm, processData, quantum = 1, periodo = 1,  overhead = 1 }) {
+export default function Simulation({ algorithm, processData, periodo = 1,   }) {
     const [simulationData, setSimulationData] = useState([]);
     const moment = useRef(0);
     const lastTick = useRef(Date.now());
@@ -43,8 +43,9 @@ useEffect(() => {
     // Inicializar processos
     processData.forEach(p => {
         p.timeline = [];
-        p.nextRelease = p.chegada;
-        p.nextDeadline = p.chegada + p.periodo;
+        p.release = p.chegada;
+        p.nextRelease = p.chegada + p.periodo;
+        p.nextDeadline = p.deadline ;
         p.remain = 0; // job começa apenas na chegada
     });
 
@@ -52,10 +53,11 @@ useEffect(() => {
 
         // 1) Liberar novos jobs
         processData.forEach(p => {
-            if (time === p.nextRelease) {
+            if (time === p.release) {
                 p.remain = p.tempo;                 // novo job
-                p.nextRelease += p.periodo;         // próxima liberação
-                p.nextDeadline += p.periodo;        // próxima deadline
+                p.release += p.periodo;         // próxima liberação
+                p.nextRelease += p.periodo;        
+                p.nextDeadline += p.periodo;
             }
         });
 
@@ -64,25 +66,37 @@ useEffect(() => {
 
         let current = null;
         if (ready.length > 0) {
-            current = ready.sort((a, b) => a.periodo - b.periodo)[0];
+            if (algorithm === "rm") {
+                current = ready.sort((a, b) => a.periodo - b.periodo)[0];
+            }
+            if (algorithm === "edf") {
+                current = ready.sort((a, b) => a.deadline - b.deadline)[0];
+            }
+            
         }
 
-        // 4) Preencher timeline de todos os processos
         processData.forEach(p => {
             if (p.chegada > time) {
                 p.timeline.push("idle");
             }
-            else if (p.remain === 0 && time < p.nextRelease) {
+            else if (p.remain === 0 && time < p.release) {
                 p.timeline.push("end");
             } 
             else if (current && p.id === current.id) {
-                p.timeline.push("exe");
-                p.remain--;
+                if (time >= (p.nextDeadline - p.periodo  )) {
+                    p.timeline.push("over");
+                    p.remain--;
+                }else {
+                    p.timeline.push("exe");
+                    p.remain--;
+                }
+                
             }
             else if (p.remain > 0) {
-                if (time + p.remain >= (p.nextDeadline  - p.periodo)) {
-                    p.timeline.push("over");
-                }else {
+                if (time + p.remain >= (p.nextRelease  - p.periodo)) {
+                    p.timeline.push("impossible");
+                }
+                else {
                     p.timeline.push("wait");
                 }
             }
@@ -131,6 +145,8 @@ useEffect(() => {
                 return "Não carregado";
             case 'end':
                 return "Finalizado";
+            case 'impossible':
+                return "Não Escalonável"
         }
     }
 

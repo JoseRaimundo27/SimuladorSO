@@ -8,9 +8,7 @@ import "./style.css";
 function Main() {
   const [numProcesses, setNumProcesses] = useState(1);
   const [algorithm, setAlgorithm] = useState("rm");
-  const [quantum, setQuantum] = useState(1);
   const [periodo, setPeriodo] = useState(1);
-  const [overhead, setOverhead] = useState(1);
   const [processData, setProcessData] = useState([]);
   const [isSimulationRunning, setIsSimulationRunning] = useState(false); // Estado para controle de execução
   const SimDialog = useRef(null);
@@ -48,8 +46,6 @@ function Main() {
   function handleExport() {
     const headConfig = {
       algorithm: algorithm,
-      quantum: quantum,
-      overhead: overhead,
       processData: processData
     }
 
@@ -73,10 +69,6 @@ function Main() {
       const obj = JSON.parse(event.target.result);
       if (obj.algorithm)
         setAlgorithm(obj.algorithm)
-      if (obj.quantum)
-        setQuantum(obj.quantum)
-      if (obj.overhead)
-        setOverhead(obj.overhead)
       if (obj.processData)
         setProcessData(obj.processData)
     };
@@ -96,8 +88,6 @@ function Main() {
 
   const handleSimulationReset = () => {
     setAlgorithm("rm");
-    setQuantum(1);
-    setOverhead(1);
     setPeriodo(1);
     setProcessData([]);
     setNumProcesses(1);
@@ -134,30 +124,10 @@ function Main() {
               onChange={(e) => setAlgorithm(e.target.value)}
             >
               <option value="rm">Rate Monotonic</option>
-              <option value="sjf">SJF</option>
               <option value="edf">EDF</option>
-              <option value="round_robin">Round Robin</option>
             </select>
           </label>
-          <label>
-            Quantum:
-            <input
-              type="number"
-              min="0"
-              value={quantum}
-              onChange={(e) => setQuantum(Number(e.target.value))}
-              disabled={algorithm !== "round_robin" && algorithm !== "edf"}
-            />
-          </label>
-          <label>
-            Sobrecarga:
-            <input
-              type="number"
-              min="0"
-              value={overhead}
-              onChange={(e) => setOverhead(Number(e.target.value))}
-            />
-          </label>
+
         </div>
 
         <div className="process-config">
@@ -204,7 +174,7 @@ function Main() {
         </div>
         {/* Renderiza o componente de simulação somente se a simulação estiver rodando */}
         {isSimulationRunning && (
-          <Simulation {...{algorithm, processData, quantum,periodo, overhead}} />
+          <Simulation {...{algorithm, processData, periodo}} />
         )}
 
       </dialog>

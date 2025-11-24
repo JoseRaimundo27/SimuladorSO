@@ -85,6 +85,15 @@ div p{
   display: block; /* ou inline, conforme necessário */
 }
 
+.timeline-block.black {
+  background-color: black;
+  color: white;
+}
+.timeline-block.black p {
+  display: block; /* ou inline, conforme necessário */
+}
+
+
 
 .timeline-progress {
   position: absolute;

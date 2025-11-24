@@ -1,5 +1,5 @@
 // ProcessCard.js
-import React from "react";
+import React, { useEffect } from "react";
 
 
 import "./style.css";
@@ -7,8 +7,19 @@ import "./style.css";
 function ProcessCard({ process, index, onChange, algorithm, disabled }) {
   const disableTime = disabled;
   const disablePages = disabled;
-  const disableDeadline = disabled || (algorithm != "edf");
+  const disableDeadline = disabled || (algorithm != "edf")  ;
   const disableArrival = disabled || index === 0;
+
+  useEffect(() => {
+    if (process.periodo < process.tempo) {
+      onChange(index, "periodo", process.tempo);
+    }
+
+    if (process.deadline < process.tempo) {
+      onChange(index, "deadline", process.tempo);
+    }
+
+  }, [process.tempo, process.periodo, process.deadline, algorithm]);
 
   return (
     <div className="process-config-card">
@@ -40,10 +51,10 @@ function ProcessCard({ process, index, onChange, algorithm, disabled }) {
           Deadline:
           <input
             type="number"
-            min="0"
+            min="1"
             value={process.deadline}
-            onChange={(e) => onChange(index, "deadline", e.target.value)}
-            disabled={disabled || (algorithm != "edf") }
+            onChange={(e) => onChange(index, "deadline", Number(e.target.value))}
+            disabled={disabled || (algorithm != "edf")}
           />
         </label>
         <label className={`process-config-label ${disableArrival ? "disabled" : ""}`}>

@@ -16,6 +16,8 @@ const TimelineBlock = ({ state, index, majorTime, minorTime }) => {
         return "dark-gray";
       case "over":
         return "red";
+      case "impossible":
+        return "black";
       default:
         return "";
     }
@@ -35,6 +37,8 @@ const TimelineBlock = ({ state, index, majorTime, minorTime }) => {
         return "#5F5F5F";
       case "over":
         return "red";
+      case "impossible":
+        return "#000000";
       default:
         return "";
     }
