@@ -17,7 +17,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p style={{"marginBottom":"1rem"}}>MATA58-SISTEMAS OPERACIONAIS</p>
+        <p style={{"marginBottom":"1rem"}}>MATA82-SISTEMAS EM TEMPO REAL</p>
       </footer>
     </div>
   );
