@@ -83,12 +83,14 @@ useEffect(() => {
                 p.timeline.push("end");
             } 
             else if (current && p.id === current.id) {
-                if (time >= (p.nextDeadline - p.periodo  )) {
+
+                if ((algorithm == "edf") && time >= (p.nextDeadline - p.periodo  )  ) {
                     p.timeline.push("over");
                     p.remain--;
                 }else {
                     p.timeline.push("exe");
                     p.remain--;
+               
                 }
                 
             }
@@ -140,7 +142,7 @@ useEffect(() => {
             case 'wait':
                 return "Em Espera";
             case 'over':
-                return "Sobrecarga";
+                return "Deadline";
             case 'idle':
                 return "Não carregado";
             case 'end':
