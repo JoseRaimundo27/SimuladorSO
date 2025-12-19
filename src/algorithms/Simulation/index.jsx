@@ -84,7 +84,7 @@ useEffect(() => {
             } 
             else if (current && p.id === current.id) {
 
-                if ((algorithm == "edf") && time >= (p.nextDeadline - p.periodo  )  ) {
+                if (time + p.remain > p.nextDeadline) {
                     p.timeline.push("over");
                     p.remain--;
                 }else {
